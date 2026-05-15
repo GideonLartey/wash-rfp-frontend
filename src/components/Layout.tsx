@@ -75,7 +75,7 @@ const Layout: React.FC = () => {
           ))}
         </nav>
 
-        {/* Footer info & Copyright - UPDATED COMPACT DESIGN */}
+        {/* Footer info & Copyright - COMPACT DESIGN */}
         <div style={{ padding: isCollapsed ? '16px 12px' : '16px 24px', borderTop: `1px solid ${theme.border}`, display: 'flex', flexDirection: 'column', gap: '4px', alignItems: isCollapsed ? 'center' : 'flex-start' }}>
           <div style={{ fontSize: '0.65rem', color: theme.textSecondary, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>
             {isCollapsed ? 'v2.4' : 'v2.4.1 (Enterprise)'}
@@ -109,7 +109,7 @@ const Layout: React.FC = () => {
           </Link>
         </div>
 
-        {/* PAGE CONTENT RENDERS HERE */}
+        {/* PAGE CONTENT RENDERS */}
         <div style={{ flex: 1, padding: '40px', overflowY: 'auto' }}>
           <Outlet /> 
         </div>

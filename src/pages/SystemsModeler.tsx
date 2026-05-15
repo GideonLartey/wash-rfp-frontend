@@ -7,7 +7,7 @@ const SystemsModeler: React.FC = () => {
     warning: '#F59E0B', danger: '#EF4444'
   };
 
-  // The 5 Core WASH Systems Building Blocks
+  // Core WASH Systems Building Blocks
   const [blocks, setBlocks] = useState({
     policy: 40,
     institutions: 30,
@@ -79,7 +79,7 @@ const SystemsModeler: React.FC = () => {
         <div style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '32px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '24px' }}>
           <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, width: '100%', textAlign: 'left' }}>10-Year Transformation Score</h2>
           
-          {/* Circular Progress Simulator */}
+          {/* CIRCULAR PROGRESS SIMULATOR */}
           <div style={{ position: 'relative', width: '200px', height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', border: `8px solid #1F1F1F`, borderTopColor: getScoreColor(transformationScore), transform: 'rotate(-45deg)', transition: 'border-color 0.5s ease' }}>
             <div style={{ transform: 'rotate(45deg)', textAlign: 'center' }}>
               <div style={{ fontSize: '3.5rem', fontWeight: 900, color: getScoreColor(transformationScore) }}>{transformationScore}</div>

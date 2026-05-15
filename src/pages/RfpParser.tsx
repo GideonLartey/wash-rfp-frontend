@@ -43,11 +43,11 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument }) => {
 
       const liveData = await response.json();
       
-      // Stop parsing spinner, trigger the success checkmark bounce
+      // Stop parsing spinner AND trigger the green success checkmark animation
       setIsParsing(false);
       setShowSuccessIcon(true);
 
-      // Wait 1 second so the user can enjoy the checkmark, THEN slide in the data
+      // Wait 1 second THEN slide in the data
       setTimeout(() => {
         setParsedData(liveData);
         setUploadedDocument(selectedFile.name);
@@ -138,7 +138,7 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument }) => {
           </div>
         </div>
 
-        {/* LIVE RESULTS SECTION (WITH SLIDE ANIMATION) */}
+        {/* LIVE RESULTS SECTION WITH SLIDE ANIMATION */}
         {parsedData && (
           <div style={{ 
             backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '24px', 

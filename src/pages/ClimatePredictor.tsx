@@ -11,7 +11,7 @@ const ClimatePredictor: React.FC<ClimatePredictorProps> = ({ setSharedVolatility
     warning: '#F59E0B', danger: '#EF4444', highlight: '#1F1F1F'
   };
 
-  // FIXED: Starts as null
+  
   const [environment, setEnvironment] = useState<'Rural' | 'Peri-Urban' | 'Urban' | null>(null);
   const [climateRisk, setClimateRisk] = useState<'Drought' | 'Flood' | 'Cyclonic' | null>(null);
   const [targetPopulation, setTargetPopulation] = useState(50000);
@@ -28,7 +28,7 @@ const ClimatePredictor: React.FC<ClimatePredictorProps> = ({ setSharedVolatility
   };
 
   useEffect(() => {
-    // Only calculate if BOTH are selected
+    
     if (!environment || !climateRisk) return;
 
     let generatedModel = "";

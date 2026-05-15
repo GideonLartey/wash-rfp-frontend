@@ -74,10 +74,10 @@ const EvidenceEngine: React.FC<EvidenceEngineProps> = ({
         </p>
       </div>
 
-      {/* TOP: SEARCH VERIFICATION BAR */}
+      {/* SEARCH VERIFICATION BAR */}
       <div style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          {/* Title changed to SEARCH */}
+          {/* SEARCH */}
           <h2 style={{ fontSize: '1rem', fontWeight: 800, margin: 0, color: theme.textPrimary, textTransform: 'uppercase' }}>SEARCH</h2>
           <span style={{ fontSize: '0.7rem', color: theme.textSecondary, backgroundColor: theme.highlight, padding: '4px 8px', borderRadius: '4px' }}>Unlimited Characters Allowed</span>
         </div>
@@ -87,7 +87,7 @@ const EvidenceEngine: React.FC<EvidenceEngineProps> = ({
           value={globalQuery}
           onChange={(e) => setGlobalQuery(e.target.value)}
           disabled={isSearching}
-          // minHeight increased to 120px
+          
           style={{ width: '100%', minHeight: '120px', backgroundColor: '#0A0A0A', border: `1px solid ${theme.border}`, borderRadius: '8px', color: theme.textPrimary, padding: '12px', fontSize: '0.9rem', fontFamily: 'inherit', resize: 'vertical', outline: 'none' }}
         />
 
@@ -106,7 +106,7 @@ const EvidenceEngine: React.FC<EvidenceEngineProps> = ({
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', alignItems: 'start' }}>
         
         {/* LEFT COLUMN: PDF Viewer */}
-        {/* Height reduced to 480px */}
+        {/* Height: 480px */}
         <div style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', overflow: 'hidden', display: 'flex', flexDirection: 'column', height: '480px' }}>
           <div style={{ padding: '12px 16px', borderBottom: `1px solid ${theme.border}`, backgroundColor: '#0D0D0D', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: '0.8rem', fontWeight: 700, color: theme.textSecondary, textTransform: 'uppercase' }}>Active Document</span>
@@ -158,11 +158,11 @@ const EvidenceEngine: React.FC<EvidenceEngineProps> = ({
 
           {isSearching && (
             <div style={{ flex: 1, backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '40px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '24px' }}>
-              {/* Size increased from 60px to 80px */}
+              {/* Size: 80px */}
               <div style={{ position: 'relative', width: '80px', height: '80px' }}>
                 <div style={{ position: 'absolute', inset: 0, border: `4px solid ${theme.border}`, borderRadius: '50%' }} />
                 <div style={{ position: 'absolute', inset: 0, border: `4px solid transparent`, borderTopColor: theme.accent, borderRightColor: theme.accent, borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
-                {/* Font size inside circle increased slightly to 0.85rem */}
+                {/* Font size inside: 0.85rem */}
                 <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem', fontWeight: 800, color: theme.accent }}>{Math.round(searchProgress)}%</div>
               </div>
               <div style={{ textAlign: 'center' }}>

@@ -4,7 +4,7 @@ import { MapContainer, TileLayer, CircleMarker, Popup, Polyline, Marker } from '
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
-// --- INJECT CUSTOM LEAFLET ANIMATION ---
+// --- CUSTOM LEAFLET ANIMATION ---
 const pulseCss = `
   @keyframes radarPulse {
     0% { transform: scale(1); opacity: 0.8; }
@@ -34,7 +34,7 @@ const animatedPulseIcon = new L.DivIcon({
   iconSize: [16, 16],
   iconAnchor: [8, 8]
 });
-// ----------------------------------------
+// ----------------FINISHED ANIMATION--------------------
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -54,7 +54,7 @@ const Dashboard: React.FC = () => {
     { title: 'Donor Partners Tracked', value: '50', change: '3 pending review, 1 approved', color: theme.warning },
   ];
 
-  // Updated Donors with mock tender counts
+  // Donors with mock tender counts
   const donors = [
     { id: 'd1', name: 'FCDO (UK)', tenders: 15, coords: [51.5074, -0.1278] as [number, number], color: theme.success },
     { id: 'd2', name: 'Global Affairs Canada', tenders: 8, coords: [45.4215, -75.6972] as [number, number], color: theme.success },
@@ -77,7 +77,7 @@ const Dashboard: React.FC = () => {
   };
 
   const handleDownloadRfps = (donorName: string) => {
-    // In a real app, this would trigger a file download.
+    // file download.
     alert(`Downloading active RFP batch from ${donorName} API... \n\nPlease note: Proceed to the RFP Parser to extract the data.`);
   };
 
@@ -119,7 +119,7 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Individual Export Modal */}
+      {/* Individual Export */}
       {showIndividualModal && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 2000, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <div style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', width: '400px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px', boxShadow: '0 20px 50px rgba(0,0,0,0.9)' }}>
@@ -145,7 +145,7 @@ const Dashboard: React.FC = () => {
         </div>
       )}
       
-      {/* Metrics Row */}
+      {/* METRICS ROW */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
         {metrics.map((metric, index) => (
           <div key={index} style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -156,7 +156,7 @@ const Dashboard: React.FC = () => {
         ))}
       </div>
 
-      {/* GIS MAP CONTAINER (Now full width) */}
+      {/* GIS MAP CONTAINER */}
       <div style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         <div style={{ padding: '20px 24px', borderBottom: `1px solid ${theme.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#0D0D0D' }}>
           <div>
@@ -179,7 +179,7 @@ const Dashboard: React.FC = () => {
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             />
             
-            {/* 1. RENDER THE DONOR NODES (WITH DOWNLOAD BUTTON) */}
+            {/* RENDER THE DONOR NODES (WITH DOWNLOAD BUTTON) */}
             {donors.map(donor => (
               <CircleMarker key={donor.id} center={donor.coords} pathOptions={{ color: donor.color, fillColor: donor.color, fillOpacity: 0.8 }} radius={6}>
                 <Popup className="custom-popup">
@@ -198,7 +198,7 @@ const Dashboard: React.FC = () => {
               </CircleMarker>
             ))}
 
-            {/* 2. RENDER THE PARTNER NODES AND CONNECTION LINES */}
+            {/* RENDER THE PARTNER NODES AND CONNECTION LINES */}
             {partners.map(partner => {
               const donorCoords = donors.find(d => d.id === partner.from)?.coords;
               return (

@@ -15,7 +15,7 @@ const App: React.FC = () => {
   const [sharedVolatility, setSharedVolatility] = useState<'Low' | 'Medium' | 'High' | null>(null);
   const [uploadedDocument, setUploadedDocument] = useState<string | null>(null);
   
-  // NEW: Global Evidence Engine Memory
+  // Global Evidence Engine Memory
   const [evidenceQuery, setEvidenceQuery] = useState("");
   const [evidenceResults, setEvidenceResults] = useState<any[] | null>(null);
 
@@ -27,7 +27,7 @@ const App: React.FC = () => {
           <Route index element={<Dashboard />} />
           <Route path="rfp-parser" element={<RfpParser setUploadedDocument={setUploadedDocument} />} />
           
-          {/* We pass the global memory down into the Evidence Engine */}
+          {/* Pass the global memory down into the Evidence Engine */}
           <Route 
             path="evidence" 
             element={

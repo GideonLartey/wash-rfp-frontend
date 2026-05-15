@@ -20,18 +20,18 @@ const Login: React.FC = () => {
   return (
     <div style={{ height: '100vh', display: 'flex', backgroundColor: '#0A0A0A', fontFamily: "'Instrument Sans', sans-serif" }}>
       
-      {/* Left Side - Branding & Value Prop */}
+      {/* Branding & Value Prop */}
       <div style={{ flex: 1, borderRight: `1px solid ${theme.border}`, display: 'flex', flexDirection: 'column', padding: '60px', position: 'relative', overflow: 'hidden' }}>
         <div style={{ zIndex: 10 }}>
           
-          {/* TOP HEADER ROW: Logo and Go Back Button */}
+          {/* Logo and Go Back Button */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '60px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <div style={{ width: '40px', height: '40px', backgroundColor: theme.accent, borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 900, color: '#fff', fontSize: '1.2rem' }}>W</div>
               <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800, color: theme.textPrimary, letterSpacing: '1px' }}>OpenWSH</h1>
             </div>
             
-            {/* THE NEW GO BACK BUTTON */}
+            {/* GO BACK BUTTON */}
             <button 
               onClick={() => navigate(-1)} 
               style={{ background: 'none', border: `1px solid ${theme.border}`, padding: '8px 16px', borderRadius: '6px', color: theme.textSecondary, cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px', transition: '0.2s' }}
@@ -52,7 +52,7 @@ const Login: React.FC = () => {
         <div style={{ position: 'absolute', bottom: '-10%', left: '-10%', width: '600px', height: '600px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,130,246,0.1) 0%, rgba(10,10,10,0) 70%)', zIndex: 1 }} />
       </div>
 
-      {/* Right Side - Authentication Form */}
+      {/* Authentication Form */}
       <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '40px' }}>
         <div style={{ width: '100%', maxWidth: '400px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
           <div>

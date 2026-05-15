@@ -31,7 +31,7 @@ const ConsortiumMatrix: React.FC = () => {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', fontFamily: "'Instrument Sans', sans-serif" }}>
       <div>
         <h1 style={{ fontSize: '2rem', fontWeight: 800, margin: 0 }}>Consortium Capability Matrix</h1>
-        {/* RESTORED: The description text below the title */}
+        {/* DESCRIPTION */}
         <p style={{ color: theme.textSecondary, marginTop: '8px', fontSize: '1rem', lineHeight: '1.5', maxWidth: '800px' }}>
           Evaluate and rank local NGO partners based on technical specialty, financial absorption capacity, and historical delivery risk for multi-country bids.
         </p>

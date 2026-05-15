@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-// 1. Define the exact data this component needs to receive
+// Define data 
 interface DataDrillDownProps {
   partnerName: string;
   activePrograms: number;
@@ -11,7 +11,7 @@ interface DataDrillDownProps {
   nextAuditDate: string;
 }
 
-// 2. Tell the component to accept those properties
+// Components accepts those properties
 const DataDrillDown: React.FC<DataDrillDownProps> = ({
   partnerName,
   activePrograms,
@@ -31,15 +31,15 @@ const DataDrillDown: React.FC<DataDrillDownProps> = ({
   return (
     <div style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', overflow: 'hidden', fontFamily: "'Instrument Sans', sans-serif" }}>
       
-      {/* HEADER */}
+      
       <div 
         onClick={() => setIsOpen(!isOpen)}
         style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', backgroundColor: isOpen ? theme.highlight : 'transparent', transition: 'background-color 0.3s' }}
       >
         <div>
-          {/* 3. Inject the dynamic name here */}
+          
           <h3 style={{ margin: 0, color: theme.textPrimary, fontSize: '1.1rem' }}>{partnerName}</h3>
-          {/* Inject the dynamic program count here */}
+          
           <p style={{ margin: '4px 0 0 0', color: theme.textSecondary, fontSize: '0.85rem' }}>Active WASH Programs: {activePrograms}</p>
         </div>
         <div style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s ease', color: theme.accent, fontSize: '1.2rem' }}>
@@ -47,7 +47,7 @@ const DataDrillDown: React.FC<DataDrillDownProps> = ({
         </div>
       </div>
 
-      {/* HIDDEN CONTENT */}
+      
       <div style={{ 
         maxHeight: isOpen ? '200px' : '0px', 
         opacity: isOpen ? 1 : 0, 
@@ -57,17 +57,17 @@ const DataDrillDown: React.FC<DataDrillDownProps> = ({
         <div style={{ padding: '20px', borderTop: `1px solid ${theme.border}`, display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
             <span style={{ color: theme.textSecondary }}>YTD Disbursement:</span>
-            {/* Inject dynamic budgets here */}
+            
             <span style={{ color: theme.textPrimary, fontWeight: 700 }}>{ytdDisbursement} / {totalBudget}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
             <span style={{ color: theme.textSecondary }}>Risk Status:</span>
-            {/* Inject dynamic risk status and colors here */}
+            
             <span style={{ color: riskColor, fontWeight: 700 }}>{riskStatus}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
             <span style={{ color: theme.textSecondary }}>Next Audit Date:</span>
-            {/* Inject dynamic date here */}
+            
             <span style={{ color: theme.textPrimary, fontWeight: 700 }}>{nextAuditDate}</span>
           </div>
         </div>

@@ -5,7 +5,7 @@ const GisMapNode: React.FC = () => {
   const accentColor = '#3B82F6';
 
   return (
-    // Wrapper positioned relative so the tooltip floats above it
+    
     <div 
       style={{ position: 'relative', display: 'inline-block', fontFamily: "'Instrument Sans', sans-serif" }}
       onMouseEnter={() => setIsHovered(true)}

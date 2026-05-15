@@ -28,7 +28,7 @@ const MonteCarloSimulator: React.FC<MonteCarloProps> = ({ initialVolatility, cle
   const [hoverX, setHoverX] = useState<number | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
 
-  // CLEANUP ON EXIT: This satisfies your requirement to reset only when leaving
+  
   useEffect(() => {
     return () => {
       console.log("Exiting Risk Simulator: Clearing Global Pipeline State.");
@@ -36,7 +36,7 @@ const MonteCarloSimulator: React.FC<MonteCarloProps> = ({ initialVolatility, cle
     };
   }, [clearVolatility]);
 
-  // THE SMASH-IT RESILIENCE ALGORITHM
+  
   const generateLifecycleCurve = (fund: number, gov: number, vol: string) => {
     const points = [];
     let currentHealth = 100;
@@ -47,10 +47,10 @@ const MonteCarloSimulator: React.FC<MonteCarloProps> = ({ initialVolatility, cle
     points.push(`0,${height - (currentHealth / 100) * height}`);
 
     for (let i = 1; i <= years; i++) {
-      // 1. DYNAMIC DECAY: Governance is the structural integrity.
+      // DYNAMIC DECAY
       let naturalDecay = 1.0 + (9.0 * (1 - gov / 100));
 
-      // 2. STOCHASTIC SHOCKS: Randomized events
+      // STOCHASTIC SHOCKS: Randomized events
       let shock = 0;
       const rand = Math.random();
       const shockChance = vol === 'High' ? 0.38 : (vol === 'Medium' ? 0.20 : 0.08);
@@ -60,15 +60,15 @@ const MonteCarloSimulator: React.FC<MonteCarloProps> = ({ initialVolatility, cle
         shock = intensity * (0.8 + Math.random() * 0.4); 
       }
 
-      // 3. REPAIR VELOCITY (FUNDING): The "Claw-Back"
-      // Even without a shock, high funding keeps a system 'tuned up' (negates decay)
+      // REPAIR VELOCITY - FUNDING EFFECT
+      // high funding keeps a system alive
       let currentDeficit = (100 - (currentHealth - naturalDecay - shock));
       let repairAbility = (fund / 100) * 0.88; 
       let recovery = currentDeficit * repairAbility;
 
       currentHealth = (currentHealth - naturalDecay - shock) + recovery;
       
-      // The "Aging Cap": A system loses 0.5% max potential every year (irreversible aging)
+      // A system loses 0.5% max potential every year 
       const maxPossible = 100 - (i * 0.5); 
       if (currentHealth > maxPossible) currentHealth = maxPossible; 
       if (currentHealth < 5) currentHealth = 5;
