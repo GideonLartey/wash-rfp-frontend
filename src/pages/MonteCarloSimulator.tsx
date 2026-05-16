@@ -106,15 +106,16 @@ const MonteCarloSimulator: React.FC<MonteCarloProps> = ({ initialVolatility, cle
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', fontFamily: "'Instrument Sans', sans-serif" }}>
       
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
+      {/* HEADER ROW - Added flexWrap so the trajectory box drops down on phones but stays right-aligned on desktop/landscape */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div style={{ flex: '1 1 300px' }}>
           <h1 style={{ fontSize: '2rem', fontWeight: 800, margin: 0 }}>Stochastic Risk Modeling (Monte Carlo)</h1>
           <p style={{ color: theme.textSecondary, marginTop: '8px', fontSize: '1rem' }}>
             Multi-variable lifecycle simulation with real-time asset degradation mapping.
           </p>
         </div>
 
-        <div style={{ width: '320px', backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <div style={{ flex: '1 1 320px', maxWidth: '400px', backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: '0.7rem', fontWeight: 800, color: theme.textSecondary, textTransform: 'uppercase' }}>Trajectory Forecast</span>
             <span style={{ fontSize: '0.7rem', color: hasRun && Number(meanScore) <= 50 ? theme.danger : theme.success, fontWeight: 700 }}>
@@ -168,9 +169,11 @@ const MonteCarloSimulator: React.FC<MonteCarloProps> = ({ initialVolatility, cle
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '24px' }}>
+      {/* MAIN SPLIT - Replaced hardcoded grid with proportionate flex wrapping */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px' }}>
         
-        <div style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        {/* LEFT CONTROLS COLUMN */}
+        <div style={{ flex: '1 1 300px', backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div>
             <h2 style={{ fontSize: '0.9rem', fontWeight: 800, color: theme.accent, textTransform: 'uppercase', margin: '0 0 4px 0' }}>Simulation Variables</h2>
             <p style={{ fontSize: '0.75rem', color: theme.textSecondary, margin: 0, fontStyle: 'italic' }}>Tweak and re-run to test resilience.</p>
@@ -182,7 +185,7 @@ const MonteCarloSimulator: React.FC<MonteCarloProps> = ({ initialVolatility, cle
                 <span style={{ fontSize: '0.85rem', color: theme.textPrimary, fontWeight: 600 }}>Funding Reliability</span>
                 <span style={{ fontSize: '0.85rem', color: theme.accent, fontWeight: 700 }}>{funding}%</span>
               </div>
-              <input type="range" min="0" max="100" value={funding} onChange={(e) => setFunding(Number(e.target.value))} style={{ width: '100%', accentColor: theme.accent }} />
+              <input type="range" min="0" max="100" value={funding} onChange={(e) => setFunding(Number(e.target.value))} style={{ width: '100%', cursor: 'pointer', accentColor: theme.accent }} />
             </div>
 
             <div>
@@ -190,7 +193,7 @@ const MonteCarloSimulator: React.FC<MonteCarloProps> = ({ initialVolatility, cle
                 <span style={{ fontSize: '0.85rem', color: theme.textPrimary, fontWeight: 600 }}>Governance Strength</span>
                 <span style={{ fontSize: '0.85rem', color: theme.accent, fontWeight: 700 }}>{governance}%</span>
               </div>
-              <input type="range" min="0" max="100" value={governance} onChange={(e) => setGovernance(Number(e.target.value))} style={{ width: '100%', accentColor: theme.accent }} />
+              <input type="range" min="0" max="100" value={governance} onChange={(e) => setGovernance(Number(e.target.value))} style={{ width: '100%', cursor: 'pointer', accentColor: theme.accent }} />
             </div>
 
             <div>
@@ -208,13 +211,16 @@ const MonteCarloSimulator: React.FC<MonteCarloProps> = ({ initialVolatility, cle
             </div>
           </div>
 
-          <button onClick={runSimulation} disabled={isSimulating} style={{ marginTop: 'auto', padding: '16px', backgroundColor: theme.accent, color: '#fff', border: 'none', borderRadius: '8px', fontSize: '1rem', fontWeight: 800, cursor: isSimulating ? 'wait' : 'pointer' }}>
+          <button onClick={runSimulation} disabled={isSimulating} style={{ marginTop: 'auto', padding: '16px', backgroundColor: theme.accent, color: '#fff', border: 'none', borderRadius: '8px', fontSize: '1rem', fontWeight: 800, cursor: isSimulating ? 'wait' : 'pointer', transition: '0.2s' }}>
             {isSimulating ? 'PROCESSING MODEL...' : 'RUN MONTE CARLO'}
           </button>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+        {/* RIGHT CHARTS COLUMN */}
+        <div style={{ flex: '2 1 300px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          
+          {/* METRICS ROW - Auto-fit grid to stack cleanly on small phones */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '16px' }}>
             <div style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '20px' }}>
               <div style={{ fontSize: '0.7rem', color: theme.textSecondary, fontWeight: 800, textTransform: 'uppercase', marginBottom: '8px' }}>Expected Mean Score</div>
               <div style={{ fontSize: '2.2rem', fontWeight: 800, color: theme.textPrimary }}>{isSimulating ? '--' : meanScore}</div>
@@ -231,8 +237,9 @@ const MonteCarloSimulator: React.FC<MonteCarloProps> = ({ initialVolatility, cle
             </div>
           </div>
 
-          <div style={{ flex: 1, backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
+          {/* DENSITY CHART */}
+          <div style={{ flex: 1, minHeight: '200px', backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '8px', marginBottom: '24px' }}>
               <h3 style={{ fontSize: '0.8rem', fontWeight: 800, color: theme.textSecondary, textTransform: 'uppercase', margin: 0 }}>Probability Density Function</h3>
               <span style={{ fontSize: '0.7rem', color: theme.success, fontWeight: 800 }}>VIABILITY THRESHOLD (75)</span>
             </div>

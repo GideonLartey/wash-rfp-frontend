@@ -37,7 +37,8 @@ const ConsortiumMatrix: React.FC = () => {
         </p>
       </div>
       
-      <div style={{ display: 'flex', gap: '12px' }}>
+      {/* Added flexWrap so buttons stack gracefully on narrow screens */}
+      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
         {['All Partners', 'Low Risk', 'High Capacity (>$1M)'].map((f) => (
           <button
             key={f}
@@ -46,7 +47,8 @@ const ConsortiumMatrix: React.FC = () => {
               backgroundColor: activeFilter === f ? 'rgba(59, 130, 246, 0.1)' : '#141414',
               color: activeFilter === f ? theme.textPrimary : theme.textSecondary,
               border: `1px solid ${activeFilter === f ? theme.accent : theme.border}`,
-              padding: '8px 20px', borderRadius: '20px', cursor: 'pointer', fontWeight: 600, transition: '0.2s'
+              padding: '8px 20px', borderRadius: '20px', cursor: 'pointer', fontWeight: 600, transition: '0.2s',
+              whiteSpace: 'nowrap'
             }}
           >
             {f}
@@ -54,8 +56,10 @@ const ConsortiumMatrix: React.FC = () => {
         ))}
       </div>
 
-      <div style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+      {/* Changed overflow to allow horizontal swiping on mobile devices */}
+      <div style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', overflowX: 'auto' }}>
+        {/* Added minWidth to prevent columns from crushing together on small screens */}
+        <table style={{ width: '100%', minWidth: '700px', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
             <tr style={{ backgroundColor: '#1F1F1F', color: theme.textSecondary, fontSize: '0.875rem' }}>
               <th style={{ padding: '16px 24px' }}>Organization</th>

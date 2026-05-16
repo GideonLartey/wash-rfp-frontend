@@ -11,7 +11,6 @@ const ClimatePredictor: React.FC<ClimatePredictorProps> = ({ setSharedVolatility
     warning: '#F59E0B', danger: '#EF4444', highlight: '#1F1F1F'
   };
 
-  
   const [environment, setEnvironment] = useState<'Rural' | 'Peri-Urban' | 'Urban' | null>(null);
   const [climateRisk, setClimateRisk] = useState<'Drought' | 'Flood' | 'Cyclonic' | null>(null);
   const [targetPopulation, setTargetPopulation] = useState(50000);
@@ -28,7 +27,6 @@ const ClimatePredictor: React.FC<ClimatePredictorProps> = ({ setSharedVolatility
   };
 
   useEffect(() => {
-    
     if (!environment || !climateRisk) return;
 
     let generatedModel = "";
@@ -78,24 +76,27 @@ const ClimatePredictor: React.FC<ClimatePredictorProps> = ({ setSharedVolatility
         </p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '24px' }}>
-        <div style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      {/* Replaced fixed grid with proportionate flex wrapping for fluid desktop/mobile states */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px' }}>
+        
+        {/* CONTROLS COLUMN */}
+        <div style={{ flex: '1 1 320px', backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
           <h2 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0, color: theme.accent, textTransform: 'uppercase', letterSpacing: '1px' }}>1. Define Context</h2>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <label style={{ fontSize: '0.875rem', fontWeight: 600, color: theme.textSecondary }}>Environment</label>
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
               {['Rural', 'Peri-Urban', 'Urban'].map(env => (
-                <button key={env} onClick={() => setEnvironment(env as any)} style={{ flex: 1, padding: '10px', backgroundColor: environment === env ? 'rgba(59, 130, 246, 0.15)' : theme.highlight, border: `1px solid ${environment === env ? theme.accent : theme.border}`, color: environment === env ? theme.accent : theme.textPrimary, borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}>{env}</button>
+                <button key={env} onClick={() => setEnvironment(env as any)} style={{ flex: 1, minWidth: '80px', padding: '10px', backgroundColor: environment === env ? 'rgba(59, 130, 246, 0.15)' : theme.highlight, border: `1px solid ${environment === env ? theme.accent : theme.border}`, color: environment === env ? theme.accent : theme.textPrimary, borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}>{env}</button>
               ))}
             </div>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <label style={{ fontSize: '0.875rem', fontWeight: 600, color: theme.textSecondary }}>Primary Climate Risk</label>
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
               {['Drought', 'Flood', 'Cyclonic'].map(risk => (
-                <button key={risk} onClick={() => handleRiskChange(risk as any)} style={{ flex: 1, padding: '10px', backgroundColor: climateRisk === risk ? 'rgba(239, 68, 68, 0.15)' : theme.highlight, border: `1px solid ${climateRisk === risk ? theme.danger : theme.border}`, color: climateRisk === risk ? theme.danger : theme.textPrimary, borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}>{risk}</button>
+                <button key={risk} onClick={() => handleRiskChange(risk as any)} style={{ flex: 1, minWidth: '80px', padding: '10px', backgroundColor: climateRisk === risk ? 'rgba(239, 68, 68, 0.15)' : theme.highlight, border: `1px solid ${climateRisk === risk ? theme.danger : theme.border}`, color: climateRisk === risk ? theme.danger : theme.textPrimary, borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}>{risk}</button>
               ))}
             </div>
           </div>
@@ -107,7 +108,8 @@ const ClimatePredictor: React.FC<ClimatePredictorProps> = ({ setSharedVolatility
           </div>
         </div>
 
-        <div style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '32px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        {/* RESULTS COLUMN */}
+        <div style={{ flex: '1.5 1 320px', backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '32px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
           {environment && climateRisk ? (
              <>
                 <h2 style={{ fontSize: '0.85rem', fontWeight: 800, margin: 0, color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '1.5px' }}>Recommended Technical Model</h2>

@@ -42,6 +42,7 @@ const Dashboard: React.FC = () => {
   // State for the Export UI
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [showIndividualModal, setShowIndividualModal] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   const theme = {
     surface: '#141414', textPrimary: '#F5F5F5', textSecondary: '#A3A3A3',
@@ -67,33 +68,80 @@ const Dashboard: React.FC = () => {
     { id: 'p3', region: 'Uganda', coords: [0.3476, 32.5825] as [number, number], org: 'Rural Hygiene Trust', capacity: '$800k', from: 'd3', grant: '$4M (Hilton)' },
   ];
 
-  const handleExport = (type: string) => {
+  // I am dynamically loading html2pdf here so we avoid complex npm build requirements
+  const handleExport = async (type: string) => {
     setShowExportMenu(false);
-    if (type === 'all') {
-      alert("Triggering API: Generating Universal PDF with Desert Clay palette...");
-    } else {
-      setShowIndividualModal(true);
+    setShowIndividualModal(false);
+    setIsExporting(true);
+
+    try {
+      if (!(window as any).html2pdf) {
+        await new Promise((resolve) => {
+          const script = document.createElement('script');
+          script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+          script.onload = resolve;
+          document.head.appendChild(script);
+        });
+      }
+
+      // Target the entire dashboard wrapper for the snapshot
+      const element = document.getElementById('dashboard-export-area');
+      const filename = type === 'all' ? 'OpenWSH_Universal_Annex.pdf' : `OpenWSH_${type.replace(/\s+/g, '_')}.pdf`;
+
+      const opt = {
+        margin:       0.5,
+        filename:     filename,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#0A0A0A' }, // useCORS allows the map tiles to render in the PDF
+        jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' }
+      };
+
+      await (window as any).html2pdf().set(opt).from(element).save();
+    } catch (error) {
+      console.error("PDF Export failed:", error);
+      alert("Failed to generate PDF. Please check your network connection.");
+    } finally {
+      setIsExporting(false);
     }
   };
 
+  // Generates a mock local JSON file to simulate pulling the tender data batch
   const handleDownloadRfps = (donorName: string) => {
-    // file download.
-    alert(`Downloading active RFP batch from ${donorName} API... \n\nPlease note: Proceed to the RFP Parser to extract the data.`);
+    const donorData = donors.find(d => d.name === donorName);
+    const mockBatchData = JSON.stringify({
+      donor: donorName,
+      status: "Active Tracking",
+      tendersAvailable: donorData?.tenders || 0,
+      timestamp: new Date().toISOString(),
+      note: "Proceed to the RFP Parser to extract metadata from the actual tender documents."
+    }, null, 2);
+
+    const blob = new Blob([mockBatchData], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${donorName.replace(/\s+/g, '_')}_Active_RFPs.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', fontFamily: "'Instrument Sans', sans-serif", paddingBottom: '40px' }}>
+    // Wrap everything in the export ID so html2pdf knows what to capture
+    <div id="dashboard-export-area" style={{ display: 'flex', flexDirection: 'column', gap: '32px', fontFamily: "'Instrument Sans', sans-serif", paddingBottom: '40px', backgroundColor: '#0A0A0A' }}>
       
       {/* Header with Export Button */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', position: 'relative' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 800, margin: 0 }}>Command Center Overview</h1>
+        <h1 style={{ fontSize: '2rem', fontWeight: 800, margin: 0, color: theme.textPrimary }}>Command Center Overview</h1>
         
         <div style={{ position: 'relative' }}>
           <button 
             onClick={() => setShowExportMenu(!showExportMenu)}
-            style={{ backgroundColor: theme.accent, color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '6px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }}
+            disabled={isExporting}
+            style={{ backgroundColor: theme.accent, color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '6px', fontWeight: 700, cursor: isExporting ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', opacity: isExporting ? 0.7 : 1 }}
           >
-            📥 EXPORT ANALYTICS <span style={{ fontSize: '0.6rem' }}>▼</span>
+            {isExporting ? 'GENERATING PDF...' : '📥 EXPORT ANALYTICS'} <span style={{ fontSize: '0.6rem' }}>▼</span>
           </button>
 
           {showExportMenu && (
@@ -107,7 +155,7 @@ const Dashboard: React.FC = () => {
                 Export All (Unified Annex)
               </div>
               <div 
-                onClick={() => handleExport('individual')} 
+                onClick={() => setShowIndividualModal(true)} 
                 style={{ padding: '12px 16px', cursor: 'pointer', fontSize: '0.85rem', color: theme.textPrimary }}
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1F1F1F'} 
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
@@ -119,12 +167,12 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Individual Export */}
+      {/* Individual Export Modal */}
       {showIndividualModal && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 2000, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <div style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', width: '400px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px', boxShadow: '0 20px 50px rgba(0,0,0,0.9)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h2 style={{ fontSize: '1.2rem', fontWeight: 800, margin: 0 }}>Select Analytic to Export</h2>
+              <h2 style={{ fontSize: '1.2rem', fontWeight: 800, margin: 0, color: theme.textPrimary }}>Select Analytic to Export</h2>
               <button onClick={() => setShowIndividualModal(false)} style={{ background: 'none', border: 'none', color: theme.textSecondary, cursor: 'pointer', fontSize: '1.5rem', lineHeight: 1 }}>×</button>
             </div>
             
@@ -132,7 +180,7 @@ const Dashboard: React.FC = () => {
               {['Climate Predictor', 'Systems Strengthening Modeler', 'Monte Carlo Risk Forecast', 'Consortium Strategy Matrix', 'RFP Parsing Report'].map(item => (
                 <button 
                   key={item}
-                  onClick={() => { alert(`Triggering API: Exporting ${item} PDF...`); setShowIndividualModal(false); }}
+                  onClick={() => handleExport(item)}
                   style={{ textAlign: 'left', padding: '12px 16px', backgroundColor: '#0A0A0A', border: `1px solid ${theme.border}`, color: theme.textPrimary, borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, transition: '0.2s' }}
                   onMouseEnter={(e) => e.currentTarget.style.borderColor = theme.accent}
                   onMouseLeave={(e) => e.currentTarget.style.borderColor = theme.border}
@@ -145,8 +193,8 @@ const Dashboard: React.FC = () => {
         </div>
       )}
       
-      {/* METRICS ROW */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
+      {/* MOBILE RESPONSIVE METRICS ROW */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
         {metrics.map((metric, index) => (
           <div key={index} style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <span style={{ color: theme.textSecondary, fontWeight: 600, fontSize: '0.875rem', textTransform: 'uppercase' }}>{metric.title}</span>
@@ -158,15 +206,15 @@ const Dashboard: React.FC = () => {
 
       {/* GIS MAP CONTAINER */}
       <div style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ padding: '20px 24px', borderBottom: `1px solid ${theme.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#0D0D0D' }}>
+        <div style={{ padding: '20px 24px', borderBottom: `1px solid ${theme.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#0D0D0D', flexWrap: 'wrap', gap: '16px' }}>
           <div>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0 }}>Live GIS Funding Tracker</h2>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, color: theme.textPrimary }}>Live GIS Funding Tracker</h2>
             <div style={{ fontSize: '0.8rem', color: theme.textSecondary, marginTop: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ display: 'inline-block', width: '8px', height: '8px', backgroundColor: theme.success, borderRadius: '50%', boxShadow: `0 0 8px ${theme.success}` }}></span>
               Real-Time FCDO, Canada, & Hilton Foundation Feeds
             </div>
           </div>
-          <div style={{ display: 'flex', gap: '16px', fontSize: '0.8rem', fontWeight: 600 }}>
+          <div style={{ display: 'flex', gap: '16px', fontSize: '0.8rem', fontWeight: 600, color: theme.textPrimary }}>
              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><span style={{ color: theme.success, fontSize: '1.2rem' }}>●</span> Donor Origin</div>
              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><span style={{ color: theme.accent, fontSize: '1.2rem' }}>●</span> Implementation Partner</div>
           </div>

@@ -1,9 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const [isAuthenticating, setIsAuthenticating] = useState(false);
+  
+  // Track screen size for the "Clean Slate" mobile layout
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const theme = {
     surface: '#141414', border: '#262626', textPrimary: '#F5F5F5',
@@ -20,41 +29,57 @@ const Login: React.FC = () => {
   return (
     <div style={{ height: '100vh', display: 'flex', backgroundColor: '#0A0A0A', fontFamily: "'Instrument Sans', sans-serif" }}>
       
-      {/* Branding & Value Prop */}
-      <div style={{ flex: 1, borderRight: `1px solid ${theme.border}`, display: 'flex', flexDirection: 'column', padding: '60px', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ zIndex: 10 }}>
-          
-          {/* Logo and Go Back Button */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '60px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ width: '40px', height: '40px', backgroundColor: theme.accent, borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 900, color: '#fff', fontSize: '1.2rem' }}>W</div>
-              <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800, color: theme.textPrimary, letterSpacing: '1px' }}>OpenWSH</h1>
-            </div>
+      {/* BRANDING & VALUE PROP (Hidden entirely on mobile for the Clean Slate look) */}
+      {!isMobile && (
+        <div style={{ flex: 1, borderRight: `1px solid ${theme.border}`, display: 'flex', flexDirection: 'column', padding: '60px', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ zIndex: 10 }}>
             
-            {/* GO BACK BUTTON */}
+            {/* Logo and Go Back Button */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '60px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '40px', height: '40px', backgroundColor: theme.accent, borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 900, color: '#fff', fontSize: '1.2rem' }}>W</div>
+                <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800, color: theme.textPrimary, letterSpacing: '1px' }}>OpenWSH</h1>
+              </div>
+              
+              {/* GO BACK BUTTON */}
+              <button 
+                onClick={() => navigate(-1)} 
+                style={{ background: 'none', border: `1px solid ${theme.border}`, padding: '8px 16px', borderRadius: '6px', color: theme.textSecondary, cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px', transition: '0.2s' }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = theme.textPrimary; e.currentTarget.style.borderColor = theme.textSecondary; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = theme.textSecondary; e.currentTarget.style.borderColor = theme.border; }}
+              >
+                &larr; Go Back
+              </button>
+            </div>
+
+            <h2 style={{ fontSize: '3rem', fontWeight: 800, color: theme.textPrimary, lineHeight: 1.1, maxWidth: '500px' }}>
+              Strategic Intelligence for Global Operations.
+            </h2>
+            <p style={{ color: theme.textSecondary, fontSize: '1.2rem', marginTop: '24px', maxWidth: '450px', lineHeight: 1.5 }}>
+              Securely interfacing with historical project data, real-time donor APIs, and context-adaptive technical frameworks.
+            </p>
+          </div>
+          <div style={{ position: 'absolute', bottom: '-10%', left: '-10%', width: '600px', height: '600px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,130,246,0.1) 0%, rgba(10,10,10,0) 70%)', zIndex: 1 }} />
+        </div>
+      )}
+
+      {/* AUTHENTICATION FORM */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: isMobile ? '24px' : '40px', position: 'relative' }}>
+        
+        {/* Mobile-Only Header (Preserves navigation when the left branding is hidden) */}
+        {isMobile && (
+          <div style={{ position: 'absolute', top: '24px', left: '24px', right: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ width: '32px', height: '32px', backgroundColor: theme.accent, borderRadius: '6px', display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 900, color: '#fff', fontSize: '1rem' }}>W</div>
             <button 
               onClick={() => navigate(-1)} 
-              style={{ background: 'none', border: `1px solid ${theme.border}`, padding: '8px 16px', borderRadius: '6px', color: theme.textSecondary, cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px', transition: '0.2s' }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = theme.textPrimary; e.currentTarget.style.borderColor = theme.textSecondary; }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = theme.textSecondary; e.currentTarget.style.borderColor = theme.border; }}
+              style={{ background: 'none', border: 'none', color: theme.textSecondary, cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}
             >
-              &larr; Go Back
+              &larr; Back
             </button>
           </div>
+        )}
 
-          <h2 style={{ fontSize: '3rem', fontWeight: 800, color: theme.textPrimary, lineHeight: 1.1, maxWidth: '500px' }}>
-            Strategic Intelligence for Global Operations.
-          </h2>
-          <p style={{ color: theme.textSecondary, fontSize: '1.2rem', marginTop: '24px', maxWidth: '450px', lineHeight: 1.5 }}>
-            Securely interfacing with historical project data, real-time donor APIs, and context-adaptive technical frameworks.
-          </p>
-        </div>
-        <div style={{ position: 'absolute', bottom: '-10%', left: '-10%', width: '600px', height: '600px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,130,246,0.1) 0%, rgba(10,10,10,0) 70%)', zIndex: 1 }} />
-      </div>
-
-      {/* Authentication Form */}
-      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '40px' }}>
-        <div style={{ width: '100%', maxWidth: '400px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        <div style={{ width: '100%', maxWidth: '400px', display: 'flex', flexDirection: 'column', gap: '24px', marginTop: isMobile ? '40px' : '0' }}>
           <div>
             <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 8px 0' }}>Enterprise Access</h3>
             <p style={{ color: theme.textSecondary, margin: 0, fontSize: '0.9rem' }}>Authenticate to access the WaterAid secure intranet and global Vector Database.</p>

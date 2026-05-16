@@ -50,7 +50,9 @@ const SystemsModeler: React.FC = () => {
         </p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+      {/* Replaced 1fr 1fr with fluid auto-fit grid for mobile responsiveness */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
+        
         {/* SLIDER CONTROLS */}
         <div style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '32px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
           <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, borderBottom: `1px solid ${theme.border}`, paddingBottom: '16px' }}>WASH Building Blocks</h2>
@@ -87,12 +89,13 @@ const SystemsModeler: React.FC = () => {
             </div>
           </div>
 
-          <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', marginTop: '24px', gap: '12px' }}>
-            <div style={{ flex: 1, padding: '16px', backgroundColor: '#0A0A0A', borderRadius: '8px', border: `1px solid ${theme.border}`, textAlign: 'center' }}>
+          {/* Added flexWrap so the metric cards stack on narrow mobile screens */}
+          <div style={{ width: '100%', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', marginTop: '24px', gap: '12px' }}>
+            <div style={{ flex: '1 1 120px', padding: '16px', backgroundColor: '#0A0A0A', borderRadius: '8px', border: `1px solid ${theme.border}`, textAlign: 'center' }}>
                <div style={{ fontSize: '0.75rem', color: theme.textSecondary, textTransform: 'uppercase' }}>Risk of Failure</div>
                <div style={{ fontWeight: 800, color: transformationScore < 50 ? theme.danger : theme.textPrimary }}>{transformationScore < 50 ? 'HIGH' : transformationScore < 75 ? 'MEDIUM' : 'LOW'}</div>
             </div>
-            <div style={{ flex: 1, padding: '16px', backgroundColor: '#0A0A0A', borderRadius: '8px', border: `1px solid ${theme.border}`, textAlign: 'center' }}>
+            <div style={{ flex: '1 1 120px', padding: '16px', backgroundColor: '#0A0A0A', borderRadius: '8px', border: `1px solid ${theme.border}`, textAlign: 'center' }}>
                <div style={{ fontSize: '0.75rem', color: theme.textSecondary, textTransform: 'uppercase' }}>Scale Potential</div>
                <div style={{ fontWeight: 800, color: transformationScore >= 75 ? theme.success : theme.textPrimary }}>{transformationScore >= 75 ? 'NATIONAL' : 'LOCALIZED'}</div>
             </div>

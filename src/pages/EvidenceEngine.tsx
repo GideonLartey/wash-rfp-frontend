@@ -102,8 +102,8 @@ const EvidenceEngine: React.FC<EvidenceEngineProps> = ({
         </div>
       </div>
 
-      {/* BOTTOM: SPLIT VIEW */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', alignItems: 'start' }}>
+      {/* BOTTOM: FLUID SPLIT VIEW FOR MOBILE/DESKTOP */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px', alignItems: 'start' }}>
         
         {/* LEFT COLUMN: PDF Viewer */}
         {/* Height: 480px */}
@@ -152,7 +152,7 @@ const EvidenceEngine: React.FC<EvidenceEngineProps> = ({
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', height: '100%' }}>
           {!isSearching && !globalResults && (
             <div style={{ flex: 1, border: `2px dashed ${theme.border}`, borderRadius: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: theme.textSecondary, padding: '40px', textAlign: 'center' }}>
-                Engine idle. Enter context or process an RFP to retrieve enterprise evidence.
+               Engine idle. Enter context or process an RFP to retrieve enterprise evidence.
             </div>
           )}
 
