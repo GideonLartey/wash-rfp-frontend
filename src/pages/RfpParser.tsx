@@ -24,6 +24,15 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument }) => {
     }
   };
 
+  // Resets everything so the dropzone instantly accepts a brand new document or upload
+  const handleReset = () => {
+    setSelectedFile(null);
+    setParsedData(null);
+    setShowSuccessIcon(false);
+    setIsParsing(false);
+    setUploadedDocument(null);
+  };
+
   const handleParse = async () => {
     if (!selectedFile) return;
     setIsParsing(true);
@@ -43,11 +52,9 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument }) => {
 
       const liveData = await response.json();
       
-      // Stop parsing spinner AND trigger the green success checkmark animation immediately
       setIsParsing(false);
       setShowSuccessIcon(true);
 
-      // Instant data mapping execution 
       if (liveData.success && liveData.data && liveData.data.project_metadata) {
         const meta = liveData.data.project_metadata;
         
@@ -150,7 +157,7 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument }) => {
           </div>
         </div>
 
-        {/* LIVE RESULTS SECTION WITH SLIDE ANIMATION */}
+        {/* LIVE RESULTS SECTION */}
         {parsedData && (
           <div style={{ 
             backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '24px', 
@@ -160,10 +167,25 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument }) => {
             
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', backgroundColor: 'rgba(16, 185, 129, 0.1)', border: `1px solid ${theme.success}`, borderRadius: '8px' }}>
               <span style={{ fontSize: '1.2rem' }}>✅</span>
-              <div>
-                <div style={{ color: theme.success, fontWeight: 800, fontSize: '0.85rem', textTransform: 'uppercase' }}>Extraction Complete</div>
-                <div style={{ color: theme.textSecondary, fontSize: '0.8rem' }}>Data parsed natively via Python Backend</div>
+              <div style={{ flex: 1, display: 'flex', justifyContent: 'between', alignItems: 'center' }}>
+                <div>
+                  <div style={{ color: theme.success, fontWeight: 800, fontSize: '0.85rem', textTransform: 'uppercase' }}>Extraction Complete</div>
+                  <div style={{ color: theme.textSecondary, fontSize: '0.8rem' }}>Data parsed natively via Python Backend</div>
+                </div>
               </div>
+              {/* CLEAN RESET LINK INSIDE ALERT CARD */}
+              <button 
+                onClick={handleReset}
+                style={{
+                  backgroundColor: 'transparent', border: `1px solid ${theme.success}`, color: theme.success,
+                  padding: '6px 12px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = theme.success; e.currentTarget.style.color = '#fff'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = theme.success; }}
+              >
+                Reset Engine
+              </button>
             </div>
 
             {/* METADATA GRID */}
