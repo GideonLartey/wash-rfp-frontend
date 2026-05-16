@@ -8,7 +8,7 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument }) => {
   const theme = {
     surface: '#141414', border: '#262626', textPrimary: '#F5F5F5',
     textSecondary: '#A3A3A3', accent: '#3B82F6', success: '#10B981', 
-    warning: '#F59E0B', highlight: 'rgba(59, 130, 246, 0.1)'
+    warning: '#F59E0B', highlight: 'rgba(59, 130, 246, 0.1)', error: '#EF4444'
   };
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -24,7 +24,7 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument }) => {
     }
   };
 
-  // Resets everything so the dropzone instantly accepts a brand new document or upload
+  // Resets everything so the dropzone instantly returns to normal, accepting a brand new document
   const handleReset = () => {
     setSelectedFile(null);
     setParsedData(null);
@@ -112,12 +112,15 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument }) => {
           <h2 style={{ fontSize: '1rem', fontWeight: 800, margin: 0, color: theme.textPrimary, textTransform: 'uppercase' }}>Document Ingestion</h2>
           
           <div style={{ border: `2px dashed ${theme.border}`, borderRadius: '8px', padding: '40px 20px', textAlign: 'center', backgroundColor: '#0A0A0A', position: 'relative' }}>
-            <input 
-              type="file" 
-              accept=".pdf" 
-              onChange={handleFileChange}
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer', zIndex: 10 }}
-            />
+            {/* Input is only active when there is no parsed data yet */}
+            {!parsedData && (
+              <input 
+                type="file" 
+                accept=".pdf" 
+                onChange={handleFileChange}
+                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer', zIndex: 10 }}
+              />
+            )}
             <div style={{ fontSize: '2.5rem', marginBottom: '16px' }}>📄</div>
             {selectedFile ? (
               <div style={{ color: theme.accent, fontWeight: 700, fontSize: '1.1rem' }}>{selectedFile.name}</div>
@@ -130,17 +133,21 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument }) => {
             )}
           </div>
 
-          {/* DYNAMIC BUTTON WITH ANIMATION */}
+          {/* MAIN DYNAMIC BUTTON ZONE */}
           <div style={{ display: 'flex', justifyContent: 'center', minHeight: '48px' }}>
             {showSuccessIcon ? (
-              <div style={{ 
-                width: '48px', height: '48px', borderRadius: '50%', backgroundColor: theme.success, 
-                display: 'flex', justifyContent: 'center', alignItems: 'center', 
-                animation: 'bounceIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
-                boxShadow: `0 0 20px ${theme.success}80`
-              }}>
-                <span style={{ color: 'white', fontSize: '1.5rem', fontWeight: 'bold' }}>✓</span>
-              </div>
+              <button 
+                onClick={handleReset}
+                style={{ 
+                  width: '100%', padding: '14px', backgroundColor: '#262626', color: theme.textPrimary, 
+                  border: `1px solid ${theme.border}`, borderRadius: '6px', 
+                  fontWeight: 800, letterSpacing: '0.5px', cursor: 'pointer', transition: 'all 0.2s',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = theme.error; e.currentTarget.style.color = '#fff'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#262626'; e.currentTarget.style.color = theme.textPrimary; }}
+              >
+                RESET ENGINE & UPLOAD NEW
+              </button>
             ) : (
               <button 
                 onClick={handleParse}
@@ -167,25 +174,10 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument }) => {
             
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', backgroundColor: 'rgba(16, 185, 129, 0.1)', border: `1px solid ${theme.success}`, borderRadius: '8px' }}>
               <span style={{ fontSize: '1.2rem' }}>✅</span>
-              <div style={{ flex: 1, display: 'flex', justifyContent: 'between', alignItems: 'center' }}>
-                <div>
-                  <div style={{ color: theme.success, fontWeight: 800, fontSize: '0.85rem', textTransform: 'uppercase' }}>Extraction Complete</div>
-                  <div style={{ color: theme.textSecondary, fontSize: '0.8rem' }}>Data parsed natively via Python Backend</div>
-                </div>
+              <div>
+                <div style={{ color: theme.success, fontWeight: 800, fontSize: '0.85rem', textTransform: 'uppercase' }}>Extraction Complete</div>
+                <div style={{ color: theme.textSecondary, fontSize: '0.8rem' }}>Data parsed natively via Python Backend</div>
               </div>
-              {/* CLEAN RESET LINK INSIDE ALERT CARD */}
-              <button 
-                onClick={handleReset}
-                style={{
-                  backgroundColor: 'transparent', border: `1px solid ${theme.success}`, color: theme.success,
-                  padding: '6px 12px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer',
-                  transition: 'all 0.2s'
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = theme.success; e.currentTarget.style.color = '#fff'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = theme.success; }}
-              >
-                Reset Engine
-              </button>
             </div>
 
             {/* METADATA GRID */}
