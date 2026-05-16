@@ -33,7 +33,7 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument }) => {
       const formData = new FormData();
       formData.append('file', selectedFile);
 
-      const apiUrl = import.meta.env.VITE_API_URL;
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://wash-ai.onrender.com';
       const response = await fetch(`${apiUrl}/api/parse-rfp`, {
         method: 'POST',
         body: formData,
