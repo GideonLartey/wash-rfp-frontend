@@ -47,9 +47,24 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument }) => {
       setIsParsing(false);
       setShowSuccessIcon(true);
 
-      // Wait 1 second THEN slide in the data
+      // Wait 1 second THEN slide in the data mapped perfectly to your UI components
       setTimeout(() => {
-        setParsedData(liveData);
+        if (liveData.success && liveData.data && liveData.data.project_metadata) {
+          const meta = liveData.data.project_metadata;
+          
+          setParsedData({
+            projectNumber: meta.reference_number || "NOT SPECIFIED",
+            budget: meta.donor || "EXTRACTED DONOR MATRIX", 
+            closingDate: meta.closing_date || "NOT SPECIFIED",
+            outcomes: [
+              `Project Title: ${meta.title || "Unknown WASH Project"}`,
+              `Submission Target Email: ${meta.submission_email || "No email detected"}`
+            ]
+          });
+        } else {
+          // Safety fallback if the data structure doesn't meet requirements
+          setParsedData(liveData);
+        }
         setUploadedDocument(selectedFile.name);
       }, 1000);
 
@@ -161,7 +176,7 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument }) => {
                 <div style={{ fontSize: '0.95rem', color: theme.accent, fontWeight: 600 }}>{parsedData.projectNumber}</div>
               </div>
               <div style={{ border: `1px solid ${theme.border}`, borderRadius: '8px', padding: '12px', backgroundColor: '#0A0A0A' }}>
-                <div style={{ fontSize: '0.7rem', color: theme.textSecondary, textTransform: 'uppercase', fontWeight: 800, marginBottom: '4px' }}>Budget Extracted</div>
+                <div style={{ fontSize: '0.7rem', color: theme.textSecondary, textTransform: 'uppercase', fontWeight: 800, marginBottom: '4px' }}>Donor Source</div>
                 <div style={{ fontSize: '1.1rem', color: theme.textPrimary, fontWeight: 800 }}>{parsedData.budget}</div>
               </div>
               <div style={{ border: `1px solid ${theme.border}`, borderRadius: '8px', padding: '12px', backgroundColor: '#0A0A0A' }}>
@@ -174,7 +189,7 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument }) => {
             <div>
               <div style={{ fontSize: '0.8rem', color: theme.textSecondary, textTransform: 'uppercase', fontWeight: 800, marginBottom: '12px', letterSpacing: '0.5px' }}>Raw Extracted Outcomes</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {parsedData.outcomes.map((outcome: string, idx: number) => (
+                {parsedData.outcomes && parsedData.outcomes.map((outcome: string, idx: number) => (
                   <div key={idx} style={{ padding: '12px', borderLeft: `3px solid ${theme.accent}`, backgroundColor: '#0A0A0A', fontSize: '0.85rem', color: theme.textPrimary, lineHeight: '1.5' }}>
                     {outcome}
                   </div>
