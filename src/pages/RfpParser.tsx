@@ -43,30 +43,27 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument }) => {
 
       const liveData = await response.json();
       
-      // Stop parsing spinner AND trigger the green success checkmark animation
+      // Stop parsing spinner AND trigger the green success checkmark animation immediately
       setIsParsing(false);
       setShowSuccessIcon(true);
 
-      // Wait 1 second THEN slide in the data mapped perfectly to your UI components
-      setTimeout(() => {
-        if (liveData.success && liveData.data && liveData.data.project_metadata) {
-          const meta = liveData.data.project_metadata;
-          
-          setParsedData({
-            projectNumber: meta.reference_number || "NOT SPECIFIED",
-            budget: meta.donor || "EXTRACTED DONOR MATRIX", 
-            closingDate: meta.closing_date || "NOT SPECIFIED",
-            outcomes: [
-              `Project Title: ${meta.title || "Unknown WASH Project"}`,
-              `Submission Target Email: ${meta.submission_email || "No email detected"}`
-            ]
-          });
-        } else {
-          // Safety fallback if the data structure doesn't meet requirements
-          setParsedData(liveData);
-        }
-        setUploadedDocument(selectedFile.name);
-      }, 1000);
+      // Instant data mapping execution 
+      if (liveData.success && liveData.data && liveData.data.project_metadata) {
+        const meta = liveData.data.project_metadata;
+        
+        setParsedData({
+          projectNumber: meta.reference_number || "NOT SPECIFIED",
+          budget: meta.donor || "EXTRACTED DONOR MATRIX", 
+          closingDate: meta.closing_date || "NOT SPECIFIED",
+          outcomes: [
+            `Project Title: ${meta.title || "Unknown WASH Project"}`,
+            `Submission Target Email: ${meta.submission_email || "No email detected"}`
+          ]
+        });
+      } else {
+        setParsedData(liveData);
+      }
+      setUploadedDocument(selectedFile.name);
 
     } catch (error) {
       console.error("Error:", error);
