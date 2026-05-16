@@ -8,7 +8,7 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument }) => {
   const theme = {
     surface: '#141414', border: '#262626', textPrimary: '#F5F5F5',
     textSecondary: '#A3A3A3', accent: '#3B82F6', success: '#10B981', 
-    warning: '#F59E0B', highlight: 'rgba(59, 130, 246, 0.1)', error: '#EF4444'
+    warning: '#F59E0B', highlight: 'rgba(59, 130, 246, 0.1)'
   };
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -22,15 +22,6 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument }) => {
       setParsedData(null);
       setShowSuccessIcon(false);
     }
-  };
-
-  // Resets everything so the dropzone instantly returns to normal, accepting a brand new document
-  const handleReset = () => {
-    setSelectedFile(null);
-    setParsedData(null);
-    setShowSuccessIcon(false);
-    setIsParsing(false);
-    setUploadedDocument(null);
   };
 
   const handleParse = async () => {
@@ -52,9 +43,11 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument }) => {
 
       const liveData = await response.json();
       
+      // Stop parsing spinner AND trigger the green success checkmark animation immediately
       setIsParsing(false);
       setShowSuccessIcon(true);
 
+      // Instant data mapping execution 
       if (liveData.success && liveData.data && liveData.data.project_metadata) {
         const meta = liveData.data.project_metadata;
         
@@ -112,15 +105,12 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument }) => {
           <h2 style={{ fontSize: '1rem', fontWeight: 800, margin: 0, color: theme.textPrimary, textTransform: 'uppercase' }}>Document Ingestion</h2>
           
           <div style={{ border: `2px dashed ${theme.border}`, borderRadius: '8px', padding: '40px 20px', textAlign: 'center', backgroundColor: '#0A0A0A', position: 'relative' }}>
-            {/* Input is only active when there is no parsed data yet */}
-            {!parsedData && (
-              <input 
-                type="file" 
-                accept=".pdf" 
-                onChange={handleFileChange}
-                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer', zIndex: 10 }}
-              />
-            )}
+            <input 
+              type="file" 
+              accept=".pdf" 
+              onChange={handleFileChange}
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer', zIndex: 10 }}
+            />
             <div style={{ fontSize: '2.5rem', marginBottom: '16px' }}>📄</div>
             {selectedFile ? (
               <div style={{ color: theme.accent, fontWeight: 700, fontSize: '1.1rem' }}>{selectedFile.name}</div>
@@ -133,21 +123,17 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument }) => {
             )}
           </div>
 
-          {/* MAIN DYNAMIC BUTTON ZONE */}
+          {/* DYNAMIC BUTTON WITH ANIMATION */}
           <div style={{ display: 'flex', justifyContent: 'center', minHeight: '48px' }}>
             {showSuccessIcon ? (
-              <button 
-                onClick={handleReset}
-                style={{ 
-                  width: '100%', padding: '14px', backgroundColor: '#262626', color: theme.textPrimary, 
-                  border: `1px solid ${theme.border}`, borderRadius: '6px', 
-                  fontWeight: 800, letterSpacing: '0.5px', cursor: 'pointer', transition: 'all 0.2s',
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = theme.error; e.currentTarget.style.color = '#fff'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#262626'; e.currentTarget.style.color = theme.textPrimary; }}
-              >
-                RESET ENGINE & UPLOAD NEW
-              </button>
+              <div style={{ 
+                width: '48px', height: '48px', borderRadius: '50%', backgroundColor: theme.success, 
+                display: 'flex', justifyContent: 'center', alignItems: 'center', 
+                animation: 'bounceIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+                boxShadow: `0 0 20px ${theme.success}80`
+              }}>
+                <span style={{ color: 'white', fontSize: '1.5rem', fontWeight: 'bold' }}>✓</span>
+              </div>
             ) : (
               <button 
                 onClick={handleParse}
@@ -164,7 +150,7 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument }) => {
           </div>
         </div>
 
-        {/* LIVE RESULTS SECTION */}
+        {/* LIVE RESULTS SECTION WITH SLIDE ANIMATION */}
         {parsedData && (
           <div style={{ 
             backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '24px', 
