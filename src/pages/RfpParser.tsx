@@ -83,6 +83,7 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument }) => {
             `Submission Target Email: ${meta.submission_email || "No email detected"}`
           ],
           // New endpoints ready for updated main.py schema
+          contractValue: meta.contract_value || null,
           eligibility: meta.eligibility_criteria || null,
           duration: meta.project_duration || null,
           demographics: meta.target_demographics || null,
@@ -227,6 +228,13 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument }) => {
               </div>
               
               {/* NEW SUB-CARDS (Rendered conditionally if backend provides them) */}
+              {parsedData.contractValue && (
+                <div style={{ border: `1px solid ${theme.border}`, borderRadius: '8px', padding: '12px', backgroundColor: '#0A0A0A' }}>
+                  <div style={{ fontSize: '0.7rem', color: theme.textSecondary, textTransform: 'uppercase', fontWeight: 800, marginBottom: '4px' }}>Contract Value</div>
+                  <div style={{ fontSize: '1.1rem', color: theme.success, fontWeight: 800 }}>{parsedData.contractValue}</div>
+                </div>
+              )}
+
               {parsedData.duration && (
                 <div style={{ border: `1px solid ${theme.border}`, borderRadius: '8px', padding: '12px', backgroundColor: '#0A0A0A' }}>
                   <div style={{ fontSize: '0.7rem', color: theme.textSecondary, textTransform: 'uppercase', fontWeight: 800, marginBottom: '4px' }}>Duration</div>
