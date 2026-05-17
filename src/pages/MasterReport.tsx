@@ -112,7 +112,7 @@ const MasterReport: React.FC = () => {
         margin:       0.5,
         filename:     'OpenWSH_Enterprise_Batch_Annex.pdf',
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#FFFFFF' }, // FORCED WHITE BACKGROUND
+        html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#FFFFFF' },
         jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
       };
 
@@ -311,7 +311,7 @@ const MasterReport: React.FC = () => {
                 </div>
               </div>
 
-              {/* Exact Visual Replication Based on View Choice */}
+              {/* Exact Visual Replication Based on View Choice - FIXED SVG FILL */}
               <div style={{ border: `1px solid ${printTheme.border}`, borderRadius: '12px', padding: '24px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
                   <h3 style={{ fontSize: '1rem', fontWeight: 800, color: printTheme.textPrimary, margin: 0 }}>Probability Density Forecast</h3>
@@ -323,7 +323,15 @@ const MasterReport: React.FC = () => {
                     <svg width="100%" height="100%" viewBox="0 0 280 100" preserveAspectRatio="none">
                       <line x1="0" y1="25" x2="280" y2="25" stroke={printTheme.border} strokeWidth="2" strokeDasharray="4 4" />
                       <line x1="0" y1="75" x2="280" y2="75" stroke={printTheme.border} strokeWidth="2" strokeDasharray="4 4" />
-                      <path d={reportData.mc.curvePath} fill="none" stroke={Number(reportData.mc.meanScore) > 60 ? printTheme.accent : (Number(reportData.mc.meanScore) > 40 ? printTheme.warning : printTheme.danger)} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                      <path 
+                        d={reportData.mc.curvePath} 
+                        fill="transparent" 
+                        style={{ fill: 'transparent', fillOpacity: 0 }} 
+                        stroke={Number(reportData.mc.meanScore) > 60 ? printTheme.accent : (Number(reportData.mc.meanScore) > 40 ? printTheme.warning : printTheme.danger)} 
+                        strokeWidth="3" 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                      />
                     </svg>
                   ) : (
                     <div style={{ height: '100%', display: 'flex', alignItems: 'flex-end', gap: '4px', borderBottom: `2px solid ${printTheme.border}`, position: 'relative' }}>
