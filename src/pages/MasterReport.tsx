@@ -112,7 +112,7 @@ const MasterReport: React.FC = () => {
         margin:       0.5,
         filename:     'OpenWSH_Enterprise_Batch_Annex.pdf',
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#FFFFFF' },
+        html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#FFFFFF' }, 
         jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
       };
 
@@ -142,7 +142,7 @@ const MasterReport: React.FC = () => {
         </div>
       </div>
 
-      {/* THE ACTUAL DOCUMENT CAPTURED BY HTML2PDF (Strictly Light Mode Styling) */}
+      {/* THE ACTUAL DOCUMENT CAPTURED BY HTML2PDF */}
       <div id="master-report-pdf" style={{ backgroundColor: printTheme.surface, padding: '40px', display: 'flex', flexDirection: 'column', gap: '48px', color: printTheme.textPrimary }}>
         
         {/* Cover Section */}
@@ -311,7 +311,7 @@ const MasterReport: React.FC = () => {
                 </div>
               </div>
 
-              {/* Exact Visual Replication Based on View Choice - FIXED SVG FILL */}
+              {/* Exact Visual Replication Based on View Choice - BULLETPROOF SVG FIX */}
               <div style={{ border: `1px solid ${printTheme.border}`, borderRadius: '12px', padding: '24px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
                   <h3 style={{ fontSize: '1rem', fontWeight: 800, color: printTheme.textPrimary, margin: 0 }}>Probability Density Forecast</h3>
@@ -320,17 +320,17 @@ const MasterReport: React.FC = () => {
 
                 <div style={{ height: '120px', width: '100%', position: 'relative' }}>
                   {reportData.mc.activeView === 'path' ? (
-                    <svg width="100%" height="100%" viewBox="0 0 280 100" preserveAspectRatio="none">
+                    <svg width="100%" height="100%" viewBox="0 0 280 100" preserveAspectRatio="none" style={{ backgroundColor: 'transparent' }}>
                       <line x1="0" y1="25" x2="280" y2="25" stroke={printTheme.border} strokeWidth="2" strokeDasharray="4 4" />
                       <line x1="0" y1="75" x2="280" y2="75" stroke={printTheme.border} strokeWidth="2" strokeDasharray="4 4" />
                       <path 
                         d={reportData.mc.curvePath} 
-                        fill="transparent" 
-                        style={{ fill: 'transparent', fillOpacity: 0 }} 
+                        fill="none" 
                         stroke={Number(reportData.mc.meanScore) > 60 ? printTheme.accent : (Number(reportData.mc.meanScore) > 40 ? printTheme.warning : printTheme.danger)} 
                         strokeWidth="3" 
                         strokeLinecap="round" 
                         strokeLinejoin="round" 
+                        style={{ fill: 'none' }}
                       />
                     </svg>
                   ) : (
