@@ -12,25 +12,33 @@ const MonteCarloSimulator: React.FC<MonteCarloProps> = ({ initialVolatility, cle
     warning: '#F59E0B', danger: '#EF4444', highlight: '#1F1F1F'
   };
 
-  const [funding, setFunding] = useState(80);
-  const [governance, setGovernance] = useState(60);
-  // Unlocked volatility state so the user can interact with it
-  const [volatility, setVolatility] = useState<'Low' | 'Medium' | 'High'>(initialVolatility || 'Medium'); 
+  // Check session storage for existing data on load
+  const savedState = JSON.parse(sessionStorage.getItem('mc_state') || '{}');
+
+  const [funding, setFunding] = useState(savedState.funding ?? 80);
+  const [governance, setGovernance] = useState(savedState.governance ?? 60);
+  const [volatility, setVolatility] = useState<'Low' | 'Medium' | 'High'>(savedState.volatility ?? initialVolatility ?? 'Medium'); 
   
   const [isSimulating, setIsSimulating] = useState(false);
-  const [hasRun, setHasRun] = useState(false);
+  const [hasRun, setHasRun] = useState(savedState.hasRun ?? false);
   
-  const [meanScore, setMeanScore] = useState<number | string>('--');
-  const [probSuccess, setProbSuccess] = useState<number | string>('--');
-  const [worstCase, setWorstCase] = useState<number | string>('--');
+  const [meanScore, setMeanScore] = useState<number | string>(savedState.meanScore ?? '--');
+  const [probSuccess, setProbSuccess] = useState<number | string>(savedState.probSuccess ?? '--');
+  const [worstCase, setWorstCase] = useState<number | string>(savedState.worstCase ?? '--');
   
-  const [curvePath, setCurvePath] = useState("");
+  const [curvePath, setCurvePath] = useState(savedState.curvePath ?? "");
+  const [activeView, setActiveView] = useState<'path' | 'graph'>(savedState.activeView ?? 'path');
+
   const [triggerDraw, setTriggerDraw] = useState(0);
   const [hoverX, setHoverX] = useState<number | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
 
-  // New state for the consolidated card toggle
-  const [activeView, setActiveView] = useState<'path' | 'graph'>('path');
+  // Sync state to sessionStorage whenever a user changes a parameter or runs the model
+  useEffect(() => {
+    sessionStorage.setItem('mc_state', JSON.stringify({
+      funding, governance, volatility, hasRun, meanScore, probSuccess, worstCase, curvePath, activeView
+    }));
+  }, [funding, governance, volatility, hasRun, meanScore, probSuccess, worstCase, curvePath, activeView]);
 
   useEffect(() => {
     return () => {
@@ -39,12 +47,25 @@ const MonteCarloSimulator: React.FC<MonteCarloProps> = ({ initialVolatility, cle
     };
   }, [clearVolatility]);
 
+  const resetSimulator = () => {
+    setFunding(80);
+    setGovernance(60);
+    setVolatility('Medium');
+    setHasRun(false);
+    setMeanScore('--');
+    setProbSuccess('--');
+    setWorstCase('--');
+    setCurvePath('');
+    setActiveView('path');
+    sessionStorage.removeItem('mc_state');
+  };
+
   const generateLifecycleCurve = (fund: number, gov: number, vol: string) => {
     const points = [];
     let currentHealth = 100;
     const years = 10;
     const width = 280; 
-    const height = 100; // Increased internal height for a better curve display
+    const height = 100; 
 
     points.push(`0,${height - (currentHealth / 100) * height}`);
 
@@ -101,18 +122,25 @@ const MonteCarloSimulator: React.FC<MonteCarloProps> = ({ initialVolatility, cle
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', fontFamily: "'Instrument Sans', sans-serif" }}>
       
-      {/* HEADER - Stays at the absolute top */}
-      <div>
-        <h1 style={{ fontSize: '2rem', fontWeight: 800, margin: 0 }}>Stochastic Risk Modeling (Monte Carlo)</h1>
-        <p style={{ color: theme.textSecondary, marginTop: '8px', fontSize: '1rem' }}>
-          Multi-variable lifecycle simulation with real-time asset degradation mapping.
-        </p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+        <div>
+          <h1 style={{ fontSize: '2rem', fontWeight: 800, margin: 0 }}>Stochastic Risk Modeling (Monte Carlo)</h1>
+          <p style={{ color: theme.textSecondary, marginTop: '8px', fontSize: '1rem' }}>
+            Multi-variable lifecycle simulation with real-time asset degradation mapping.
+          </p>
+        </div>
+        <button 
+          onClick={resetSimulator}
+          style={{ padding: '8px 16px', backgroundColor: 'transparent', border: `1px solid ${theme.danger}`, color: theme.danger, borderRadius: '6px', fontSize: '0.8rem', fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s' }}
+          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = theme.danger; e.currentTarget.style.color = '#fff'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = theme.danger; }}
+        >
+          RESET SIMULATOR
+        </button>
       </div>
 
-      {/* MAIN SPLIT */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px' }}>
         
-        {/* LEFT CONTROLS COLUMN */}
         <div style={{ flex: '1 1 300px', backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div>
             <h2 style={{ fontSize: '0.9rem', fontWeight: 800, color: theme.accent, textTransform: 'uppercase', margin: '0 0 4px 0' }}>Simulation Variables</h2>
@@ -160,13 +188,10 @@ const MonteCarloSimulator: React.FC<MonteCarloProps> = ({ initialVolatility, cle
           </button>
         </div>
 
-        {/* RIGHT COLUMN (Combined Visual Card + Metrics) */}
         <div style={{ flex: '2 1 300px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
           
-          {/* MASTER COMBINED CARD */}
           <div style={{ flex: 1, minHeight: '220px', backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column' }}>
             
-            {/* Header & Toggle */}
             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
               <h3 style={{ fontSize: '0.85rem', fontWeight: 800, color: theme.textSecondary, textTransform: 'uppercase', margin: 0 }}>Probability Density Forecast</h3>
               
@@ -186,11 +211,8 @@ const MonteCarloSimulator: React.FC<MonteCarloProps> = ({ initialVolatility, cle
               </div>
             </div>
 
-            {/* Dynamic Content Area */}
             <div style={{ flex: 1, position: 'relative', display: 'flex', flexDirection: 'column' }}>
-              
               {activeView === 'path' ? (
-                // THE LINE CURVE VIEW
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                   <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
                     <span style={{ fontSize: '0.7rem', color: hasRun && Number(meanScore) <= 50 ? theme.danger : theme.success, fontWeight: 700 }}>
@@ -244,7 +266,6 @@ const MonteCarloSimulator: React.FC<MonteCarloProps> = ({ initialVolatility, cle
                   </div>
                 </div>
               ) : (
-                // THE HISTOGRAM VIEW
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                   <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
                      <span style={{ fontSize: '0.7rem', color: theme.success, fontWeight: 800 }}>VIABILITY THRESHOLD (75)</span>
@@ -261,11 +282,9 @@ const MonteCarloSimulator: React.FC<MonteCarloProps> = ({ initialVolatility, cle
                   </div>
                 </div>
               )}
-
             </div>
           </div>
 
-          {/* METRICS ROW (Remains at the bottom, stacks neatly on mobile) */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '16px' }}>
             <div style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '20px' }}>
               <div style={{ fontSize: '0.7rem', color: theme.textSecondary, fontWeight: 800, textTransform: 'uppercase', marginBottom: '8px' }}>Expected Mean Score</div>
@@ -282,7 +301,6 @@ const MonteCarloSimulator: React.FC<MonteCarloProps> = ({ initialVolatility, cle
               <div style={{ fontSize: '2.2rem', fontWeight: 800, color: hasRun ? theme.danger : theme.textPrimary }}>{isSimulating ? '--' : worstCase}</div>
             </div>
           </div>
-
         </div>
       </div>
     </div>

@@ -17,28 +17,28 @@ const EvidenceEngine: React.FC<EvidenceEngineProps> = ({
 }) => {
   const theme = {
     surface: '#141414', border: '#262626', textPrimary: '#F5F5F5',
-    textSecondary: '#A3A3A3', accent: '#3B82F6', success: '#10B981', highlight: '#1F1F1F'
+    textSecondary: '#A3A3A3', accent: '#3B82F6', success: '#10B981', highlight: '#1F1F1F', danger: '#EF4444'
   };
 
   const [isSearching, setIsSearching] = useState(false);
   const [statusIndex, setStatusIndex] = useState(0);
-  
   const [searchProgress, setSearchProgress] = useState(0);
+  
+  // Local state to manage the visibility of the queued document
+  const [isCleared, setIsCleared] = useState(false);
 
-  const statusMessages = [
-    "Initializing NLP Pipeline & Chunking Input...",
-    "Generating Vector Embeddings (text-embedding-ada-002)...",
-    "Querying Vector Database (Pinecone) via gRPC...",
-    "Calculating Cosine Similarity across historical bids...",
-    "Re-ranking semantic matches and applying filters...",
-    "Synthesizing Evidence & Generating Citations..."
-  ];
+  // If a new document is sent from the RFP Parser, reset the cleared state
+  useEffect(() => {
+    setIsCleared(false);
+  }, [queuedDocument]);
+
+  const activeDoc = isCleared ? null : queuedDocument;
 
   useEffect(() => {
-    if (queuedDocument && !globalQuery) {
-      setGlobalQuery(`[Auto-Extracted Context from: ${queuedDocument}]\nInitiating semantic match against historical enterprise data...`);
+    if (activeDoc && !globalQuery) {
+      setGlobalQuery(`[Auto-Extracted Context from: ${activeDoc}]\nInitiating semantic match against historical enterprise data...`);
     }
-  }, [queuedDocument, globalQuery, setGlobalQuery]);
+  }, [activeDoc, globalQuery, setGlobalQuery]);
 
   const triggerVerification = () => {
     if (!globalQuery.trim()) return;
@@ -65,6 +65,21 @@ const EvidenceEngine: React.FC<EvidenceEngineProps> = ({
     }, 1500);
   };
 
+  const statusMessages = [
+    "Initializing NLP Pipeline & Chunking Input...",
+    "Generating Vector Embeddings (text-embedding-ada-002)...",
+    "Querying Vector Database (Pinecone) via gRPC...",
+    "Calculating Cosine Similarity across historical bids...",
+    "Re-ranking semantic matches and applying filters...",
+    "Synthesizing Evidence & Generating Citations..."
+  ];
+
+  const handleClearDocument = () => {
+    setIsCleared(true);
+    setGlobalQuery('');
+    setGlobalResults(null);
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', fontFamily: "'Instrument Sans', sans-serif" }}>
       <div>
@@ -74,10 +89,8 @@ const EvidenceEngine: React.FC<EvidenceEngineProps> = ({
         </p>
       </div>
 
-      {/* SEARCH VERIFICATION BAR */}
       <div style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          {/* SEARCH */}
           <h2 style={{ fontSize: '1rem', fontWeight: 800, margin: 0, color: theme.textPrimary, textTransform: 'uppercase' }}>SEARCH</h2>
           <span style={{ fontSize: '0.7rem', color: theme.textSecondary, backgroundColor: theme.highlight, padding: '4px 8px', borderRadius: '4px' }}>Unlimited Characters Allowed</span>
         </div>
@@ -87,7 +100,6 @@ const EvidenceEngine: React.FC<EvidenceEngineProps> = ({
           value={globalQuery}
           onChange={(e) => setGlobalQuery(e.target.value)}
           disabled={isSearching}
-          
           style={{ width: '100%', minHeight: '120px', backgroundColor: '#0A0A0A', border: `1px solid ${theme.border}`, borderRadius: '8px', color: theme.textPrimary, padding: '12px', fontSize: '0.9rem', fontFamily: 'inherit', resize: 'vertical', outline: 'none' }}
         />
 
@@ -102,44 +114,44 @@ const EvidenceEngine: React.FC<EvidenceEngineProps> = ({
         </div>
       </div>
 
-      {/* BOTTOM: FLUID SPLIT VIEW FOR MOBILE/DESKTOP */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px', alignItems: 'start' }}>
         
-        {/* LEFT COLUMN: PDF Viewer */}
-        {/* Height: 480px */}
         <div style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', overflow: 'hidden', display: 'flex', flexDirection: 'column', height: '480px' }}>
           <div style={{ padding: '12px 16px', borderBottom: `1px solid ${theme.border}`, backgroundColor: '#0D0D0D', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: '0.8rem', fontWeight: 700, color: theme.textSecondary, textTransform: 'uppercase' }}>Active Document</span>
-            <span style={{ fontSize: '0.8rem', color: theme.accent, fontWeight: 700 }}>{queuedDocument || 'No Document Queued'}</span>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span style={{ fontSize: '0.8rem', color: theme.accent, fontWeight: 700 }}>{activeDoc || 'No Document Queued'}</span>
+              
+              {/* THE NEW 'X' BUTTON */}
+              {activeDoc && (
+                <button 
+                  onClick={handleClearDocument}
+                  style={{ background: 'none', border: 'none', color: theme.danger, cursor: 'pointer', fontSize: '1.25rem', fontWeight: 900, lineHeight: 1, padding: '0 4px', transition: '0.2s' }}
+                  title="Remove Document"
+                  onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.2)'}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                >
+                  ×
+                </button>
+              )}
+            </div>
           </div>
+          
           <div style={{ flex: 1, backgroundColor: '#1A1A1A', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '24px', position: 'relative' }}>
-            {queuedDocument ? (
-               // Simulated Front Page
+            {activeDoc ? (
                <div style={{ width: '100%', height: '100%', backgroundColor: '#fff', borderRadius: '4px', padding: '30px', position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                 
-                 <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#333', marginBottom: '12px', textAlign: 'center', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                   Official Tender Document
-                 </div>
-                 
-                 <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#1a1a1a', textAlign: 'center', marginBottom: '16px', lineHeight: 1.3, wordBreak: 'break-word' }}>
-                   {queuedDocument}
-                 </div>
-                 
+                 <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#333', marginBottom: '12px', textAlign: 'center', textTransform: 'uppercase', letterSpacing: '1px' }}>Official Tender Document</div>
+                 <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#1a1a1a', textAlign: 'center', marginBottom: '16px', lineHeight: 1.3, wordBreak: 'break-word' }}>{activeDoc}</div>
                  <div style={{ width: '100%', height: '2px', backgroundColor: '#e5e7eb', marginBottom: '24px' }} />
-                 
                  <div style={{ width: '80%', height: '8px', backgroundColor: '#e5e7eb', marginBottom: '12px' }} />
                  <div style={{ width: '100%', height: '8px', backgroundColor: '#f3f4f6', marginBottom: '12px' }} />
                  <div style={{ width: '90%', height: '8px', backgroundColor: '#f3f4f6', marginBottom: '24px' }} />
-                 
                  <div style={{ width: '60%', height: '8px', backgroundColor: '#e5e7eb', marginBottom: '12px' }} />
                  <div style={{ width: '95%', height: '8px', backgroundColor: '#f3f4f6', marginBottom: '12px' }} />
-                 
                  <div style={{ flex: 1 }} />
                  <div style={{ fontSize: '0.6rem', color: '#9ca3af', textAlign: 'center' }}>Cover Page Extraction</div>
-
-                 {isSearching && (
-                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', backgroundColor: 'rgba(59, 130, 246, 0.5)', boxShadow: '0 0 20px 5px rgba(59, 130, 246, 0.5)', animation: 'scan 2s linear infinite' }} />
-                 )}
+                 {isSearching && <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', backgroundColor: 'rgba(59, 130, 246, 0.5)', boxShadow: '0 0 20px 5px rgba(59, 130, 246, 0.5)', animation: 'scan 2s linear infinite' }} />}
                </div>
             ) : (
                <div style={{ color: theme.textSecondary, fontSize: '0.9rem' }}>Awaiting document ingestion from RFP Parser.</div>
@@ -148,7 +160,6 @@ const EvidenceEngine: React.FC<EvidenceEngineProps> = ({
           </div>
         </div>
 
-        {/* RIGHT COLUMN: RAG Loader & Results */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', height: '100%' }}>
           {!isSearching && !globalResults && (
             <div style={{ flex: 1, border: `2px dashed ${theme.border}`, borderRadius: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: theme.textSecondary, padding: '40px', textAlign: 'center' }}>
@@ -158,11 +169,9 @@ const EvidenceEngine: React.FC<EvidenceEngineProps> = ({
 
           {isSearching && (
             <div style={{ flex: 1, backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '40px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '24px' }}>
-              {/* Size: 80px */}
               <div style={{ position: 'relative', width: '80px', height: '80px' }}>
                 <div style={{ position: 'absolute', inset: 0, border: `4px solid ${theme.border}`, borderRadius: '50%' }} />
                 <div style={{ position: 'absolute', inset: 0, border: `4px solid transparent`, borderTopColor: theme.accent, borderRightColor: theme.accent, borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
-                {/* Font size inside: 0.85rem */}
                 <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem', fontWeight: 800, color: theme.accent }}>{Math.round(searchProgress)}%</div>
               </div>
               <div style={{ textAlign: 'center' }}>

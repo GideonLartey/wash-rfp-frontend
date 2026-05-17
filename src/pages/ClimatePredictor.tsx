@@ -11,19 +11,34 @@ const ClimatePredictor: React.FC<ClimatePredictorProps> = ({ setSharedVolatility
     warning: '#F59E0B', danger: '#EF4444', highlight: '#1F1F1F'
   };
 
-  const [environment, setEnvironment] = useState<'Rural' | 'Peri-Urban' | 'Urban' | null>(null);
-  const [climateRisk, setClimateRisk] = useState<'Drought' | 'Flood' | 'Cyclonic' | null>(null);
-  const [targetPopulation, setTargetPopulation] = useState(50000);
+  // Check session storage for existing data on load
+  const savedState = JSON.parse(sessionStorage.getItem('cp_state') || '{}');
+  
+  const [environment, setEnvironment] = useState<'Rural' | 'Peri-Urban' | 'Urban' | null>(savedState.environment ?? null);
+  const [climateRisk, setClimateRisk] = useState<'Drought' | 'Flood' | 'Cyclonic' | null>(savedState.climateRisk ?? null);
+  const [targetPopulation, setTargetPopulation] = useState<number>(savedState.targetPopulation ?? 50000);
 
   const [modelName, setModelName] = useState("");
   const [frameworkSpecs, setFrameworkSpecs] = useState<string[]>([]);
   const [capexRisk, setCapexRisk] = useState("");
+
+  // Sync state to sessionStorage whenever a user changes a parameter
+  useEffect(() => {
+    sessionStorage.setItem('cp_state', JSON.stringify({ environment, climateRisk, targetPopulation }));
+  }, [environment, climateRisk, targetPopulation]);
 
   const handleRiskChange = (risk: 'Drought' | 'Flood' | 'Cyclonic') => {
     setClimateRisk(risk);
     if (risk === 'Drought') setSharedVolatility('High');
     if (risk === 'Cyclonic') setSharedVolatility('High');
     if (risk === 'Flood') setSharedVolatility('Medium');
+  };
+
+  const resetPredictor = () => {
+    setEnvironment(null);
+    setClimateRisk(null);
+    setTargetPopulation(50000);
+    sessionStorage.removeItem('cp_state');
   };
 
   useEffect(() => {
@@ -69,17 +84,24 @@ const ClimatePredictor: React.FC<ClimatePredictorProps> = ({ setSharedVolatility
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', fontFamily: "'Instrument Sans', sans-serif" }}>
-      <div>
-        <h1 style={{ fontSize: '2rem', fontWeight: 800, margin: 0 }}>Context-Adaptive Technical Frameworks</h1>
-        <p style={{ color: theme.textSecondary, marginTop: '8px', fontSize: '1rem', lineHeight: '1.5', maxWidth: '800px' }}>
-          Select parameters below to dynamically generate a scalable WASH technical model. Your climate selection will automatically inform the Monte Carlo Risk Simulator.
-        </p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+        <div>
+          <h1 style={{ fontSize: '2rem', fontWeight: 800, margin: 0 }}>Context-Adaptive Technical Frameworks</h1>
+          <p style={{ color: theme.textSecondary, marginTop: '8px', fontSize: '1rem', lineHeight: '1.5', maxWidth: '800px' }}>
+            Select parameters below to dynamically generate a scalable WASH technical model. Your climate selection will automatically inform the Monte Carlo Risk Simulator.
+          </p>
+        </div>
+        <button 
+          onClick={resetPredictor}
+          style={{ padding: '8px 16px', backgroundColor: 'transparent', border: `1px solid ${theme.danger}`, color: theme.danger, borderRadius: '6px', fontSize: '0.8rem', fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s' }}
+          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = theme.danger; e.currentTarget.style.color = '#fff'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = theme.danger; }}
+        >
+          RESET PREDICTOR
+        </button>
       </div>
 
-      {/* Replaced fixed grid with proportionate flex wrapping for fluid desktop/mobile states */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px' }}>
-        
-        {/* CONTROLS COLUMN */}
         <div style={{ flex: '1 1 320px', backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
           <h2 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0, color: theme.accent, textTransform: 'uppercase', letterSpacing: '1px' }}>1. Define Context</h2>
           
@@ -108,7 +130,6 @@ const ClimatePredictor: React.FC<ClimatePredictorProps> = ({ setSharedVolatility
           </div>
         </div>
 
-        {/* RESULTS COLUMN */}
         <div style={{ flex: '1.5 1 320px', backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '32px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
           {environment && climateRisk ? (
              <>

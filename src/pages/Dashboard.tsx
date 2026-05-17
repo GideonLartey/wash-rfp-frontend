@@ -4,7 +4,6 @@ import { MapContainer, TileLayer, CircleMarker, Popup, Polyline, Marker } from '
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
-// --- CUSTOM LEAFLET ANIMATION ---
 const pulseCss = `
   @keyframes radarPulse {
     0% { transform: scale(1); opacity: 0.8; }
@@ -34,12 +33,10 @@ const animatedPulseIcon = new L.DivIcon({
   iconSize: [16, 16],
   iconAnchor: [8, 8]
 });
-// ----------------FINISHED ANIMATION--------------------
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   
-  // State for the Export UI
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [showIndividualModal, setShowIndividualModal] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -55,7 +52,6 @@ const Dashboard: React.FC = () => {
     { title: 'Donor Partners Tracked', value: '50', change: '3 pending review, 1 approved', color: theme.warning },
   ];
 
-  // Donors with mock tender counts
   const donors = [
     { id: 'd1', name: 'FCDO (UK)', tenders: 15, coords: [51.5074, -0.1278] as [number, number], color: theme.success },
     { id: 'd2', name: 'Global Affairs Canada', tenders: 8, coords: [45.4215, -75.6972] as [number, number], color: theme.success },
@@ -68,8 +64,7 @@ const Dashboard: React.FC = () => {
     { id: 'p3', region: 'Uganda', coords: [0.3476, 32.5825] as [number, number], org: 'Rural Hygiene Trust', capacity: '$800k', from: 'd3', grant: '$4M (Hilton)' },
   ];
 
-  // I am dynamically loading html2pdf here so we avoid complex npm build requirements
-  const handleExport = async (type: string) => {
+  const handleExport = async () => {
     setShowExportMenu(false);
     setShowIndividualModal(false);
     setIsExporting(true);
@@ -84,15 +79,12 @@ const Dashboard: React.FC = () => {
         });
       }
 
-      // Target the entire dashboard wrapper for the snapshot
       const element = document.getElementById('dashboard-export-area');
-      const filename = type === 'all' ? 'OpenWSH_Universal_Annex.pdf' : `OpenWSH_${type.replace(/\s+/g, '_')}.pdf`;
-
       const opt = {
         margin:       0.5,
-        filename:     filename,
+        filename:     'OpenWSH_Universal_Annex.pdf',
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#0A0A0A' }, // useCORS allows the map tiles to render in the PDF
+        html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#0A0A0A' }, 
         jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' }
       };
 
@@ -105,7 +97,6 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  // Generates a mock local JSON file to simulate pulling the tender data batch
   const handleDownloadRfps = (donorName: string) => {
     const donorData = donors.find(d => d.name === donorName);
     const mockBatchData = JSON.stringify({
@@ -128,10 +119,8 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    // Wrap everything in the export ID so html2pdf knows what to capture
     <div id="dashboard-export-area" style={{ display: 'flex', flexDirection: 'column', gap: '32px', fontFamily: "'Instrument Sans', sans-serif", paddingBottom: '40px', backgroundColor: '#0A0A0A' }}>
       
-      {/* Header with Export Button */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', position: 'relative' }}>
         <h1 style={{ fontSize: '2rem', fontWeight: 800, margin: 0, color: theme.textPrimary }}>Command Center Overview</h1>
         
@@ -147,12 +136,12 @@ const Dashboard: React.FC = () => {
           {showExportMenu && (
             <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: '8px', width: '200px', backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '8px', zIndex: 1000, overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.8)' }}>
               <div 
-                onClick={() => handleExport('all')} 
+                onClick={handleExport} 
                 style={{ padding: '12px 16px', cursor: 'pointer', fontSize: '0.85rem', color: theme.textPrimary, borderBottom: `1px solid ${theme.border}` }}
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1F1F1F'} 
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
               >
-                Export All (Unified Annex)
+                Export Current Dashboard
               </div>
               <div 
                 onClick={() => setShowIndividualModal(true)} 
@@ -160,32 +149,41 @@ const Dashboard: React.FC = () => {
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1F1F1F'} 
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
               >
-                Export Individual Module...
+                Go to Module & Export...
               </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* Individual Export Modal */}
       {showIndividualModal && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 2000, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <div style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', width: '400px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px', boxShadow: '0 20px 50px rgba(0,0,0,0.9)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h2 style={{ fontSize: '1.2rem', fontWeight: 800, margin: 0, color: theme.textPrimary }}>Select Analytic to Export</h2>
+              <h2 style={{ fontSize: '1.2rem', fontWeight: 800, margin: 0, color: theme.textPrimary }}>Navigate & Export</h2>
               <button onClick={() => setShowIndividualModal(false)} style={{ background: 'none', border: 'none', color: theme.textSecondary, cursor: 'pointer', fontSize: '1.5rem', lineHeight: 1 }}>×</button>
             </div>
             
             <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '8px' }}>
-              {['Climate Predictor', 'Systems Strengthening Modeler', 'Monte Carlo Risk Forecast', 'Consortium Strategy Matrix', 'RFP Parsing Report'].map(item => (
+              {[
+                { name: 'Climate Predictor', route: '/climate' }, 
+                { name: 'Systems Strengthening Modeler', route: '/systems' }, 
+                { name: 'Monte Carlo Risk Forecast', route: '/monte-carlo' }, 
+                { name: 'Consortium Strategy Matrix', route: '/consortium' }, 
+                { name: 'RFP Parsing Report', route: '/rfp-parser' }
+              ].map(item => (
                 <button 
-                  key={item}
-                  onClick={() => handleExport(item)}
+                  key={item.name}
+                  onClick={() => {
+                    setShowIndividualModal(false);
+                    navigate(item.route);
+                    alert(`Mapsd to ${item.name}. Use your browser's Print function (Ctrl+P / Cmd+P) to save this interactive module as a PDF.`);
+                  }}
                   style={{ textAlign: 'left', padding: '12px 16px', backgroundColor: '#0A0A0A', border: `1px solid ${theme.border}`, color: theme.textPrimary, borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, transition: '0.2s' }}
                   onMouseEnter={(e) => e.currentTarget.style.borderColor = theme.accent}
                   onMouseLeave={(e) => e.currentTarget.style.borderColor = theme.border}
                 >
-                  📄 {item}
+                  📄 Go to {item.name} &rarr;
                 </button>
               ))}
             </div>
@@ -193,7 +191,6 @@ const Dashboard: React.FC = () => {
         </div>
       )}
       
-      {/* MOBILE RESPONSIVE METRICS ROW */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
         {metrics.map((metric, index) => (
           <div key={index} style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -204,7 +201,6 @@ const Dashboard: React.FC = () => {
         ))}
       </div>
 
-      {/* GIS MAP CONTAINER */}
       <div style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         <div style={{ padding: '20px 24px', borderBottom: `1px solid ${theme.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#0D0D0D', flexWrap: 'wrap', gap: '16px' }}>
           <div>
@@ -227,7 +223,6 @@ const Dashboard: React.FC = () => {
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             />
             
-            {/* RENDER THE DONOR NODES (WITH DOWNLOAD BUTTON) */}
             {donors.map(donor => (
               <CircleMarker key={donor.id} center={donor.coords} pathOptions={{ color: donor.color, fillColor: donor.color, fillOpacity: 0.8 }} radius={6}>
                 <Popup className="custom-popup">
@@ -246,7 +241,6 @@ const Dashboard: React.FC = () => {
               </CircleMarker>
             ))}
 
-            {/* RENDER THE PARTNER NODES AND CONNECTION LINES */}
             {partners.map(partner => {
               const donorCoords = donors.find(d => d.id === partner.from)?.coords;
               return (
