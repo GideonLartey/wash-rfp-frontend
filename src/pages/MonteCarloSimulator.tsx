@@ -14,7 +14,8 @@ const MonteCarloSimulator: React.FC<MonteCarloProps> = ({ initialVolatility, cle
 
   const [funding, setFunding] = useState(80);
   const [governance, setGovernance] = useState(60);
-  const volatility = initialVolatility || 'Medium'; 
+  // Unlocked volatility state so the user can interact with it
+  const [volatility, setVolatility] = useState<'Low' | 'Medium' | 'High'>(initialVolatility || 'Medium'); 
   
   const [isSimulating, setIsSimulating] = useState(false);
   const [hasRun, setHasRun] = useState(false);
@@ -28,7 +29,9 @@ const MonteCarloSimulator: React.FC<MonteCarloProps> = ({ initialVolatility, cle
   const [hoverX, setHoverX] = useState<number | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
 
-  
+  // New state for the consolidated card toggle
+  const [activeView, setActiveView] = useState<'path' | 'graph'>('path');
+
   useEffect(() => {
     return () => {
       console.log("Exiting Risk Simulator: Clearing Global Pipeline State.");
@@ -36,21 +39,17 @@ const MonteCarloSimulator: React.FC<MonteCarloProps> = ({ initialVolatility, cle
     };
   }, [clearVolatility]);
 
-  
   const generateLifecycleCurve = (fund: number, gov: number, vol: string) => {
     const points = [];
     let currentHealth = 100;
     const years = 10;
     const width = 280; 
-    const height = 60; 
+    const height = 100; // Increased internal height for a better curve display
 
     points.push(`0,${height - (currentHealth / 100) * height}`);
 
     for (let i = 1; i <= years; i++) {
-      // DYNAMIC DECAY
       let naturalDecay = 1.0 + (9.0 * (1 - gov / 100));
-
-      // STOCHASTIC SHOCKS: Randomized events
       let shock = 0;
       const rand = Math.random();
       const shockChance = vol === 'High' ? 0.38 : (vol === 'Medium' ? 0.20 : 0.08);
@@ -60,15 +59,12 @@ const MonteCarloSimulator: React.FC<MonteCarloProps> = ({ initialVolatility, cle
         shock = intensity * (0.8 + Math.random() * 0.4); 
       }
 
-      // REPAIR VELOCITY - FUNDING EFFECT
-      // high funding keeps a system alive
       let currentDeficit = (100 - (currentHealth - naturalDecay - shock));
       let repairAbility = (fund / 100) * 0.88; 
       let recovery = currentDeficit * repairAbility;
 
       currentHealth = (currentHealth - naturalDecay - shock) + recovery;
       
-      // A system loses 0.5% max potential every year 
       const maxPossible = 100 - (i * 0.5); 
       if (currentHealth > maxPossible) currentHealth = maxPossible; 
       if (currentHealth < 5) currentHealth = 5;
@@ -89,7 +85,6 @@ const MonteCarloSimulator: React.FC<MonteCarloProps> = ({ initialVolatility, cle
     setTriggerDraw(prev => prev + 1); 
 
     setTimeout(() => {
-      // Calculation logic for cards
       const govWeight = governance * 0.55;
       const fundWeight = funding * 0.45;
       const volPenalty = volatility === 'High' ? 28 : (volatility === 'Medium' ? 14 : 4);
@@ -106,70 +101,15 @@ const MonteCarloSimulator: React.FC<MonteCarloProps> = ({ initialVolatility, cle
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', fontFamily: "'Instrument Sans', sans-serif" }}>
       
-      {/* HEADER ROW - Added flexWrap so the trajectory box drops down on phones but stays right-aligned on desktop/landscape */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div style={{ flex: '1 1 300px' }}>
-          <h1 style={{ fontSize: '2rem', fontWeight: 800, margin: 0 }}>Stochastic Risk Modeling (Monte Carlo)</h1>
-          <p style={{ color: theme.textSecondary, marginTop: '8px', fontSize: '1rem' }}>
-            Multi-variable lifecycle simulation with real-time asset degradation mapping.
-          </p>
-        </div>
-
-        <div style={{ flex: '1 1 320px', maxWidth: '400px', backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: '0.7rem', fontWeight: 800, color: theme.textSecondary, textTransform: 'uppercase' }}>Trajectory Forecast</span>
-            <span style={{ fontSize: '0.7rem', color: hasRun && Number(meanScore) <= 50 ? theme.danger : theme.success, fontWeight: 700 }}>
-              {hasRun ? 'Interactive Degradation' : 'Awaiting Input'}
-            </span>
-          </div>
-          
-          <div style={{ height: '60px', width: '100%', position: 'relative' }}>
-            <svg 
-              ref={svgRef}
-              width="100%" height="100%" viewBox="0 0 280 60" preserveAspectRatio="none"
-              onMouseMove={(e) => {
-                if (!svgRef.current || !hasRun || isSimulating) return;
-                const rect = svgRef.current.getBoundingClientRect();
-                setHoverX(Math.max(0, Math.min(e.clientX - rect.left, 280)));
-              }}
-              onMouseLeave={() => setHoverX(null)}
-              style={{ cursor: hasRun && !isSimulating ? 'crosshair' : 'default' }}
-            >
-              <line x1="0" y1="15" x2="280" y2="15" stroke={theme.border} strokeWidth="1" strokeDasharray="4 4" />
-              <line x1="0" y1="45" x2="280" y2="45" stroke={theme.border} strokeWidth="1" strokeDasharray="4 4" />
-              
-              {hasRun && (
-                <path 
-                  key={triggerDraw}
-                  d={curvePath}
-                  fill="none"
-                  stroke={Number(meanScore) > 60 ? theme.accent : (Number(meanScore) > 40 ? theme.warning : theme.danger)}
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  style={{ strokeDasharray: 1000, strokeDashoffset: isSimulating ? 1000 : 0, transition: isSimulating ? 'none' : 'stroke-dashoffset 1.2s ease-in-out' }}
-                />
-              )}
-
-              {hoverX !== null && hasRun && !isSimulating && (
-                <g>
-                  <line x1={hoverX} y1="0" x2={hoverX} y2="60" stroke="#FFFFFF" strokeWidth="1.5" opacity="0.8" />
-                  <rect x={hoverX < 240 ? hoverX + 6 : hoverX - 46} y="4" width="42" height="18" fill={theme.highlight} stroke={theme.border} strokeWidth="1" rx="4" />
-                  <text x={hoverX < 240 ? hoverX + 27 : hoverX - 25} y="16" fill="#FFFFFF" fontSize="9" textAnchor="middle" fontWeight="bold" fontFamily="monospace">
-                    Yr {Math.max(1, (hoverX / 280) * 10).toFixed(1)}
-                  </text>
-                </g>
-              )}
-            </svg>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px', fontSize: '0.6rem', color: theme.textSecondary }}>
-              <span>START</span>
-              <span>YEAR 10</span>
-            </div>
-          </div>
-        </div>
+      {/* HEADER - Stays at the absolute top */}
+      <div>
+        <h1 style={{ fontSize: '2rem', fontWeight: 800, margin: 0 }}>Stochastic Risk Modeling (Monte Carlo)</h1>
+        <p style={{ color: theme.textSecondary, marginTop: '8px', fontSize: '1rem' }}>
+          Multi-variable lifecycle simulation with real-time asset degradation mapping.
+        </p>
       </div>
 
-      {/* MAIN SPLIT - Replaced hardcoded grid with proportionate flex wrapping */}
+      {/* MAIN SPLIT */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px' }}>
         
         {/* LEFT CONTROLS COLUMN */}
@@ -199,13 +139,17 @@ const MonteCarloSimulator: React.FC<MonteCarloProps> = ({ initialVolatility, cle
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                 <span style={{ fontSize: '0.85rem', color: theme.textSecondary, fontWeight: 600 }}>Climate Risk</span>
-                <span style={{ fontSize: '0.6rem', color: theme.warning, fontWeight: 800, backgroundColor: 'rgba(245, 158, 11, 0.1)', padding: '2px 6px', borderRadius: '4px' }}>LOCKED</span>
+                <span style={{ fontSize: '0.6rem', color: theme.success, fontWeight: 800, backgroundColor: 'rgba(16, 185, 129, 0.1)', padding: '2px 6px', borderRadius: '4px' }}>ACTIVE</span>
               </div>
               <div style={{ display: 'flex', gap: '4px' }}>
                 {['Low', 'Medium', 'High'].map(level => (
-                  <div key={level} style={{ flex: 1, padding: '8px 0', textAlign: 'center', border: `1px solid ${volatility === level ? theme.accent : theme.border}`, borderRadius: '4px', fontSize: '0.75rem', fontWeight: 700, backgroundColor: volatility === level ? 'rgba(59, 130, 246, 0.1)' : 'transparent', color: volatility === level ? '#fff' : theme.textSecondary, opacity: volatility === level ? 1 : 0.3 }}>
+                  <button 
+                    key={level} 
+                    onClick={() => setVolatility(level as any)}
+                    style={{ flex: 1, padding: '8px 0', textAlign: 'center', border: `1px solid ${volatility === level ? theme.accent : theme.border}`, borderRadius: '4px', fontSize: '0.75rem', fontWeight: 700, backgroundColor: volatility === level ? 'rgba(59, 130, 246, 0.1)' : 'transparent', color: volatility === level ? '#fff' : theme.textSecondary, opacity: volatility === level ? 1 : 0.5, cursor: 'pointer', transition: '0.2s' }}
+                  >
                     {level}
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
@@ -216,10 +160,112 @@ const MonteCarloSimulator: React.FC<MonteCarloProps> = ({ initialVolatility, cle
           </button>
         </div>
 
-        {/* RIGHT CHARTS COLUMN */}
+        {/* RIGHT COLUMN (Combined Visual Card + Metrics) */}
         <div style={{ flex: '2 1 300px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
           
-          {/* METRICS ROW - Auto-fit grid to stack cleanly on small phones */}
+          {/* MASTER COMBINED CARD */}
+          <div style={{ flex: 1, minHeight: '220px', backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column' }}>
+            
+            {/* Header & Toggle */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+              <h3 style={{ fontSize: '0.85rem', fontWeight: 800, color: theme.textSecondary, textTransform: 'uppercase', margin: 0 }}>Probability Density Forecast</h3>
+              
+              <div style={{ display: 'flex', backgroundColor: '#0A0A0A', borderRadius: '6px', border: `1px solid ${theme.border}`, overflow: 'hidden' }}>
+                <button 
+                  onClick={() => setActiveView('path')} 
+                  style={{ background: activeView === 'path' ? theme.highlight : 'transparent', color: activeView === 'path' ? theme.textPrimary : theme.textSecondary, border: 'none', padding: '6px 16px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', transition: '0.2s' }}
+                >
+                  LINE CURVE
+                </button>
+                <button 
+                  onClick={() => setActiveView('graph')} 
+                  style={{ background: activeView === 'graph' ? theme.highlight : 'transparent', color: activeView === 'graph' ? theme.textPrimary : theme.textSecondary, border: 'none', padding: '6px 16px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', transition: '0.2s' }}
+                >
+                  HISTOGRAM
+                </button>
+              </div>
+            </div>
+
+            {/* Dynamic Content Area */}
+            <div style={{ flex: 1, position: 'relative', display: 'flex', flexDirection: 'column' }}>
+              
+              {activeView === 'path' ? (
+                // THE LINE CURVE VIEW
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '0.7rem', color: hasRun && Number(meanScore) <= 50 ? theme.danger : theme.success, fontWeight: 700 }}>
+                      {hasRun ? 'Interactive Degradation Active' : 'Awaiting Input'}
+                    </span>
+                  </div>
+                  
+                  <div style={{ flex: 1, position: 'relative' }}>
+                    <svg 
+                      ref={svgRef}
+                      width="100%" height="100%" viewBox="0 0 280 100" preserveAspectRatio="none"
+                      onMouseMove={(e) => {
+                        if (!svgRef.current || !hasRun || isSimulating) return;
+                        const rect = svgRef.current.getBoundingClientRect();
+                        setHoverX(Math.max(0, Math.min(e.clientX - rect.left, 280)));
+                      }}
+                      onMouseLeave={() => setHoverX(null)}
+                      style={{ cursor: hasRun && !isSimulating ? 'crosshair' : 'default', display: 'block' }}
+                    >
+                      <line x1="0" y1="25" x2="280" y2="25" stroke={theme.border} strokeWidth="1" strokeDasharray="4 4" />
+                      <line x1="0" y1="75" x2="280" y2="75" stroke={theme.border} strokeWidth="1" strokeDasharray="4 4" />
+                      
+                      {hasRun && (
+                        <path 
+                          key={triggerDraw}
+                          d={curvePath}
+                          fill="none"
+                          stroke={Number(meanScore) > 60 ? theme.accent : (Number(meanScore) > 40 ? theme.warning : theme.danger)}
+                          strokeWidth="3"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          style={{ strokeDasharray: 1000, strokeDashoffset: isSimulating ? 1000 : 0, transition: isSimulating ? 'none' : 'stroke-dashoffset 1.2s ease-in-out' }}
+                        />
+                      )}
+
+                      {hoverX !== null && hasRun && !isSimulating && (
+                        <g>
+                          <line x1={hoverX} y1="0" x2={hoverX} y2="100" stroke="#FFFFFF" strokeWidth="1.5" opacity="0.8" />
+                          <rect x={hoverX < 240 ? hoverX + 6 : hoverX - 46} y="4" width="42" height="18" fill={theme.highlight} stroke={theme.border} strokeWidth="1" rx="4" />
+                          <text x={hoverX < 240 ? hoverX + 27 : hoverX - 25} y="16" fill="#FFFFFF" fontSize="9" textAnchor="middle" fontWeight="bold" fontFamily="monospace">
+                            Yr {Math.max(1, (hoverX / 280) * 10).toFixed(1)}
+                          </text>
+                        </g>
+                      )}
+                    </svg>
+                  </div>
+                  
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', fontSize: '0.6rem', color: theme.textSecondary, fontWeight: 700 }}>
+                    <span>START</span>
+                    <span>YEAR 10</span>
+                  </div>
+                </div>
+              ) : (
+                // THE HISTOGRAM VIEW
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
+                     <span style={{ fontSize: '0.7rem', color: theme.success, fontWeight: 800 }}>VIABILITY THRESHOLD (75)</span>
+                  </div>
+                  <div style={{ flex: 1, display: 'flex', alignItems: 'flex-end', gap: '4px', borderBottom: `1px solid ${theme.border}`, paddingBottom: '8px', position: 'relative' }}>
+                     <div style={{ position: 'absolute', bottom: 8, left: '75%', top: 0, borderLeft: `2px dashed ${theme.success}`, opacity: 0.5 }} />
+                     {[8, 15, 30, 45, 65, 90, 100, 70, 35, 12].map((height, i) => (
+                       <div key={i} style={{ flex: 1, height: !hasRun ? '4%' : (isSimulating ? '15%' : `${height}%`), backgroundColor: i >= 7 ? theme.success : theme.accent, borderRadius: '4px 4px 0 0', opacity: !hasRun ? 0.1 : (isSimulating ? 0.2 : 0.8), transition: 'height 0.6s ease-out, opacity 0.4s' }} />
+                     ))}
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', fontSize: '0.6rem', color: theme.textSecondary, fontWeight: 700 }}>
+                    <span>SCORE 0</span>
+                    <span>SCORE 100</span>
+                  </div>
+                </div>
+              )}
+
+            </div>
+          </div>
+
+          {/* METRICS ROW (Remains at the bottom, stacks neatly on mobile) */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '16px' }}>
             <div style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '20px' }}>
               <div style={{ fontSize: '0.7rem', color: theme.textSecondary, fontWeight: 800, textTransform: 'uppercase', marginBottom: '8px' }}>Expected Mean Score</div>
@@ -237,20 +283,6 @@ const MonteCarloSimulator: React.FC<MonteCarloProps> = ({ initialVolatility, cle
             </div>
           </div>
 
-          {/* DENSITY CHART */}
-          <div style={{ flex: 1, minHeight: '200px', backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '8px', marginBottom: '24px' }}>
-              <h3 style={{ fontSize: '0.8rem', fontWeight: 800, color: theme.textSecondary, textTransform: 'uppercase', margin: 0 }}>Probability Density Function</h3>
-              <span style={{ fontSize: '0.7rem', color: theme.success, fontWeight: 800 }}>VIABILITY THRESHOLD (75)</span>
-            </div>
-            
-            <div style={{ flex: 1, display: 'flex', alignItems: 'flex-end', gap: '4px', borderBottom: `1px solid ${theme.border}`, paddingBottom: '8px', position: 'relative' }}>
-               <div style={{ position: 'absolute', bottom: 8, left: '75%', top: 0, borderLeft: `2px dashed ${theme.success}`, opacity: 0.5 }} />
-               {[8, 15, 30, 45, 65, 90, 100, 70, 35, 12].map((height, i) => (
-                 <div key={i} style={{ flex: 1, height: !hasRun ? '4%' : (isSimulating ? '15%' : `${height}%`), backgroundColor: i >= 7 ? theme.success : theme.accent, borderRadius: '4px 4px 0 0', opacity: !hasRun ? 0.1 : (isSimulating ? 0.2 : 0.8), transition: 'height 0.6s ease-out, opacity 0.4s' }} />
-               ))}
-            </div>
-          </div>
         </div>
       </div>
     </div>
