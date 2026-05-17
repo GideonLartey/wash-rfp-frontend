@@ -82,7 +82,7 @@ const Dashboard: React.FC = () => {
       const element = document.getElementById('dashboard-export-area');
       const opt = {
         margin:       0.5,
-        filename:     'OpenWSH_Universal_Annex.pdf',
+        filename:     'OpenWSH_Dashboard_Overview.pdf',
         image:        { type: 'jpeg', quality: 0.98 },
         html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#0A0A0A' }, 
         jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' }
@@ -133,23 +133,35 @@ const Dashboard: React.FC = () => {
             {isExporting ? 'GENERATING PDF...' : '📥 EXPORT ANALYTICS'} <span style={{ fontSize: '0.6rem' }}>▼</span>
           </button>
 
+          {/* UPDATED EXPORT MENU */}
           {showExportMenu && (
-            <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: '8px', width: '200px', backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '8px', zIndex: 1000, overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.8)' }}>
+            <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: '8px', width: '240px', backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '8px', zIndex: 1000, overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.8)' }}>
+              
+              <div 
+                onClick={() => navigate('/master-report')} 
+                style={{ padding: '12px 16px', cursor: 'pointer', fontSize: '0.85rem', color: theme.accent, fontWeight: 800, borderBottom: `1px solid ${theme.border}` }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1F1F1F'} 
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+              >
+                📥 Generate Master Batch Annex
+              </div>
+
               <div 
                 onClick={handleExport} 
                 style={{ padding: '12px 16px', cursor: 'pointer', fontSize: '0.85rem', color: theme.textPrimary, borderBottom: `1px solid ${theme.border}` }}
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1F1F1F'} 
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
               >
-                Export Current Dashboard
+                Export Current View Only
               </div>
+              
               <div 
                 onClick={() => setShowIndividualModal(true)} 
                 style={{ padding: '12px 16px', cursor: 'pointer', fontSize: '0.85rem', color: theme.textPrimary }}
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1F1F1F'} 
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
               >
-                Go to Module & Export...
+                Export Individual Module...
               </div>
             </div>
           )}
@@ -255,7 +267,7 @@ const Dashboard: React.FC = () => {
                         <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#000', margin: '4px 0' }}>{partner.org}</div>
                         <div style={{ fontSize: '0.85rem', fontWeight: 700, color: theme.success }}>Target Sub-Award: {partner.grant}</div>
                         <button 
-                          onClick={() => navigate('/consortium-matrix')}
+                          onClick={() => navigate('/consortium')}
                           style={{ display: 'block', width: '100%', marginTop: '12px', padding: '8px', backgroundColor: theme.accent, color: '#fff', border: 'none', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}
                         >
                           ANALYZE IN MATRIX &rarr;

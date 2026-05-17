@@ -1,18 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const ConsortiumMatrix: React.FC = () => {
   const theme = {
-    surface: '#141414',
-    textPrimary: '#F5F5F5',
-    textSecondary: '#A3A3A3',
-    border: '#262626',
-    success: '#10B981',
-    warning: '#F59E0B',
-    danger: '#EF4444',
-    accent: '#3B82F6',
+    surface: '#141414', textPrimary: '#F5F5F5', textSecondary: '#A3A3A3',
+    border: '#262626', success: '#10B981', warning: '#F59E0B', danger: '#EF4444', accent: '#3B82F6',
   };
 
-  const [activeFilter, setActiveFilter] = useState('All Partners');
+  const savedFilter = sessionStorage.getItem('cm_filter') || 'All Partners';
+  const [activeFilter, setActiveFilter] = useState(savedFilter);
+
+  useEffect(() => {
+    sessionStorage.setItem('cm_filter', activeFilter);
+  }, [activeFilter]);
 
   const allPartners = [
     { name: 'Maji Safi Initiative', country: 'Kenya', specialty: 'Urban Sanitation', capacity: 2500000, risk: 'Low', score: 92 },
@@ -27,17 +26,30 @@ const ConsortiumMatrix: React.FC = () => {
     return true;
   });
 
+  const resetMatrix = () => {
+    setActiveFilter('All Partners');
+    sessionStorage.removeItem('cm_filter');
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', fontFamily: "'Instrument Sans', sans-serif" }}>
-      <div>
-        <h1 style={{ fontSize: '2rem', fontWeight: 800, margin: 0 }}>Consortium Capability Matrix</h1>
-        {/* DESCRIPTION */}
-        <p style={{ color: theme.textSecondary, marginTop: '8px', fontSize: '1rem', lineHeight: '1.5', maxWidth: '800px' }}>
-          Evaluate and rank local NGO partners based on technical specialty, financial absorption capacity, and historical delivery risk for multi-country bids.
-        </p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+        <div>
+          <h1 style={{ fontSize: '2rem', fontWeight: 800, margin: 0 }}>Consortium Capability Matrix</h1>
+          <p style={{ color: theme.textSecondary, marginTop: '8px', fontSize: '1rem', lineHeight: '1.5', maxWidth: '800px' }}>
+            Evaluate and rank local NGO partners based on technical specialty, financial absorption capacity, and historical delivery risk for multi-country bids.
+          </p>
+        </div>
+        <button 
+          onClick={resetMatrix}
+          style={{ padding: '8px 16px', backgroundColor: 'transparent', border: `1px solid ${theme.danger}`, color: theme.danger, borderRadius: '6px', fontSize: '0.8rem', fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s' }}
+          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = theme.danger; e.currentTarget.style.color = '#fff'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = theme.danger; }}
+        >
+          RESET MATRIX
+        </button>
       </div>
       
-      {/* Added flexWrap so buttons stack gracefully on narrow screens */}
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
         {['All Partners', 'Low Risk', 'High Capacity (>$1M)'].map((f) => (
           <button
@@ -56,9 +68,7 @@ const ConsortiumMatrix: React.FC = () => {
         ))}
       </div>
 
-      {/* Changed overflow to allow horizontal swiping on mobile devices */}
       <div style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', overflowX: 'auto' }}>
-        {/* Added minWidth to prevent columns from crushing together on small screens */}
         <table style={{ width: '100%', minWidth: '700px', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
             <tr style={{ backgroundColor: '#1F1F1F', color: theme.textSecondary, fontSize: '0.875rem' }}>

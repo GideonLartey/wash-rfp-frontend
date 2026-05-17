@@ -9,6 +9,7 @@ import ClimatePredictor from './pages/ClimatePredictor';
 import MonteCarloSimulator from './pages/MonteCarloSimulator';
 import RfpParser from './pages/RfpParser';
 import Login from './pages/Login';
+import MasterReport from './pages/MasterReport'; 
 
 const App: React.FC = () => {
   // Global Pipeline State
@@ -27,7 +28,7 @@ const App: React.FC = () => {
           <Route index element={<Dashboard />} />
           <Route path="rfp-parser" element={<RfpParser setUploadedDocument={setUploadedDocument} />} />
           
-          {/* Pass the global memory down into the Evidence Engine */}
+          {/* Passing the global memory down into the Evidence Engine */}
           <Route 
             path="evidence" 
             element={
@@ -53,6 +54,10 @@ const App: React.FC = () => {
               />
             } 
           />
+          
+          {/* ROUTE FOR THE NEW PAGE */}
+          <Route path="master-report" element={<MasterReport />} />
+          
         </Route>
       </Routes>
     </Router>
