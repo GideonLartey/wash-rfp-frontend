@@ -111,7 +111,7 @@ const Layout: React.FC = () => {
           </div>
           {(!isCollapsed || isMobile) && (
             <div style={{ fontSize: '0.75rem', color: theme.textSecondary, opacity: 0.8, whiteSpace: 'nowrap' }}>
-              &copy; Not affiliated with WaterAid.
+              Not affiliated with WaterAid.
             </div>
           )}
         </div>
