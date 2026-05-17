@@ -39,7 +39,6 @@ const Dashboard: React.FC = () => {
   
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [showIndividualModal, setShowIndividualModal] = useState(false);
-  const [isExporting, setIsExporting] = useState(false);
 
   const theme = {
     surface: '#141414', textPrimary: '#F5F5F5', textSecondary: '#A3A3A3',
@@ -64,39 +63,6 @@ const Dashboard: React.FC = () => {
     { id: 'p3', region: 'Uganda', coords: [0.3476, 32.5825] as [number, number], org: 'Rural Hygiene Trust', capacity: '$800k', from: 'd3', grant: '$4M (Hilton)' },
   ];
 
-  const handleExport = async () => {
-    setShowExportMenu(false);
-    setShowIndividualModal(false);
-    setIsExporting(true);
-
-    try {
-      if (!(window as any).html2pdf) {
-        await new Promise((resolve) => {
-          const script = document.createElement('script');
-          script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
-          script.onload = resolve;
-          document.head.appendChild(script);
-        });
-      }
-
-      const element = document.getElementById('dashboard-export-area');
-      const opt = {
-        margin:       0.5,
-        filename:     'OpenWSH_Dashboard_Overview.pdf',
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#0A0A0A' }, 
-        jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' }
-      };
-
-      await (window as any).html2pdf().set(opt).from(element).save();
-    } catch (error) {
-      console.error("PDF Export failed:", error);
-      alert("Failed to generate PDF. Please check your network connection.");
-    } finally {
-      setIsExporting(false);
-    }
-  };
-
   const handleDownloadRfps = (donorName: string) => {
     const donorData = donors.find(d => d.name === donorName);
     const mockBatchData = JSON.stringify({
@@ -119,7 +85,7 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div id="dashboard-export-area" style={{ display: 'flex', flexDirection: 'column', gap: '32px', fontFamily: "'Instrument Sans', sans-serif", paddingBottom: '40px', backgroundColor: '#0A0A0A' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', fontFamily: "'Instrument Sans', sans-serif", paddingBottom: '40px' }}>
       
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', position: 'relative' }}>
         <h1 style={{ fontSize: '2rem', fontWeight: 800, margin: 0, color: theme.textPrimary }}>Command Center Overview</h1>
@@ -127,13 +93,11 @@ const Dashboard: React.FC = () => {
         <div style={{ position: 'relative' }}>
           <button 
             onClick={() => setShowExportMenu(!showExportMenu)}
-            disabled={isExporting}
-            style={{ backgroundColor: theme.accent, color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '6px', fontWeight: 700, cursor: isExporting ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', opacity: isExporting ? 0.7 : 1 }}
+            style={{ backgroundColor: theme.accent, color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '6px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }}
           >
-            {isExporting ? 'GENERATING PDF...' : '📥 EXPORT ANALYTICS'} <span style={{ fontSize: '0.6rem' }}>▼</span>
+            📥 EXPORT ANALYTICS <span style={{ fontSize: '0.6rem' }}>▼</span>
           </button>
 
-          {/* UPDATED EXPORT MENU */}
           {showExportMenu && (
             <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: '8px', width: '240px', backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '8px', zIndex: 1000, overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.8)' }}>
               
@@ -143,16 +107,7 @@ const Dashboard: React.FC = () => {
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1F1F1F'} 
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
               >
-                📥 Generate Master Batch Annex
-              </div>
-
-              <div 
-                onClick={handleExport} 
-                style={{ padding: '12px 16px', cursor: 'pointer', fontSize: '0.85rem', color: theme.textPrimary, borderBottom: `1px solid ${theme.border}` }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1F1F1F'} 
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-              >
-                Export Current View Only
+                📥 Generate Master Batch PDF
               </div>
               
               <div 
