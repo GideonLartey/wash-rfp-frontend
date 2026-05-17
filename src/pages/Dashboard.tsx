@@ -88,7 +88,7 @@ const Dashboard: React.FC = () => {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', fontFamily: "'Instrument Sans', sans-serif", paddingBottom: '40px' }}>
       
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', position: 'relative' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 800, margin: 0, color: theme.textPrimary }}>Command Center Overview</h1>
+        <h1 style={{ fontSize: '2rem', fontWeight: 800, margin: 0, color: theme.textPrimary }}>Command Centre Overview</h1>
         
         <div style={{ position: 'relative' }}>
           <button 

@@ -21,7 +21,7 @@ const Layout: React.FC = () => {
   };
 
   const navItems = [
-    { path: '/', label: 'Command Center', icon: '📊' },
+    { path: '/', label: 'Command Centre', icon: '📊' },
     { path: '/rfp-parser', label: 'Bid Shredder', icon: '📄' },
     { path: '/evidence', label: 'Evidence Engine', icon: '🧠' },
     { path: '/climate', label: 'Climate Predictor', icon: '🌍' },
