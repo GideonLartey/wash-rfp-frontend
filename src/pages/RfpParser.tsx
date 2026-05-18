@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 interface RfpParserProps {
   setUploadedDocument: (doc: string | null) => void;
-  setExtractedRfp?: (data: any) => void; // Added the pipeline prop
+  setExtractedRfp?: (data: any) => void;
 }
 
 const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument, setExtractedRfp }) => {
@@ -18,7 +18,6 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument, setExtracted
   const [showSuccessIcon, setShowSuccessIcon] = useState(false);
   const [parsedData, setParsedData] = useState<any | null>(null);
 
-  // Initialize state from local session storage so data survives tab switching
   useEffect(() => {
     const cachedData = sessionStorage.getItem('rfpParsedData');
     const cachedFileName = sessionStorage.getItem('rfpFileName');
@@ -30,9 +29,9 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument, setExtracted
       setShowSuccessIcon(true);
       setUploadedDocument(cachedFileName);
       
-      // NEW: Restore the pipeline memory if the user refreshes the page
+      // Keep pipeline active on refresh using the clean primary country
       if (setExtractedRfp) {
-        setExtractedRfp({ target_demographics: parsed.demographics });
+        setExtractedRfp({ target_demographics: parsed.primaryCountry });
       }
     }
   }, [setUploadedDocument, setExtractedRfp]);
@@ -46,7 +45,6 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument, setExtracted
     }
   };
 
-  // Wipe session cache and local view, but leave Evidence Engine global state alone
   const handleReset = () => {
     setSelectedFile(null);
     setFileName(null);
@@ -93,17 +91,17 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument, setExtracted
           eligibility: meta.eligibility_criteria || null,
           duration: meta.project_duration || null,
           demographics: meta.target_demographics || null,
+          primaryCountry: meta.primary_country || null, // NEW: Capture the clean country
           deliverables: meta.key_deliverables || null
         };
 
         setParsedData(extractedPayload);
         
-        // NEW: Push the raw metadata up to the Global Pipeline so Climate Predictor can catch it
+        // THE FIX: Push ONLY the clean, strict country name up to the pipeline
         if (setExtractedRfp) {
-            setExtractedRfp(meta);
+            setExtractedRfp({ target_demographics: meta.primary_country || meta.target_demographics });
         }
         
-        // Cache data locally 
         sessionStorage.setItem('rfpParsedData', JSON.stringify(extractedPayload));
         sessionStorage.setItem('rfpFileName', selectedFile.name);
 
@@ -146,7 +144,6 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument, setExtracted
 
       <div style={{ display: 'grid', gridTemplateColumns: parsedData ? 'repeat(auto-fit, minmax(320px, 1fr))' : '1fr', gap: '24px', alignItems: 'start', transition: 'all 0.5s ease' }}>
         
-        {/* UPLOAD SECTION */}
         <div style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <h2 style={{ fontSize: '1rem', fontWeight: 800, margin: 0, color: theme.textPrimary, textTransform: 'uppercase' }}>Document Ingestion</h2>
           
@@ -169,7 +166,6 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument, setExtracted
             )}
           </div>
 
-          {/* DYNAMIC BUTTON */}
           <div style={{ display: 'flex', justifyContent: 'center', minHeight: '48px' }}>
             {showSuccessIcon ? (
               <div style={{ 
@@ -196,7 +192,6 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument, setExtracted
           </div>
         </div>
 
-        {/* LIVE RESULTS SECTION */}
         {parsedData && (
           <div style={{ 
             backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '24px', 
@@ -222,7 +217,6 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument, setExtracted
               </button>
             </div>
 
-            {/* RESPONSIVE METADATA GRID */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '16px' }}>
               <div style={{ border: `1px solid ${theme.border}`, borderRadius: '8px', padding: '12px', backgroundColor: '#0A0A0A' }}>
                 <div style={{ fontSize: '0.7rem', color: theme.textSecondary, textTransform: 'uppercase', fontWeight: 800, marginBottom: '4px' }}>Project Number</div>
@@ -252,7 +246,6 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument, setExtracted
               )}
             </div>
 
-            {/* EXTRACTED OUTCOMES */}
             <div>
               <div style={{ fontSize: '0.8rem', color: theme.textSecondary, textTransform: 'uppercase', fontWeight: 800, marginBottom: '12px', letterSpacing: '0.5px' }}>Raw Extracted Outcomes</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -264,7 +257,6 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument, setExtracted
               </div>
             </div>
 
-            {/* ADDITIONAL WASH FIELDS */}
             {parsedData.eligibility && (
               <div>
                 <div style={{ fontSize: '0.8rem', color: theme.textSecondary, textTransform: 'uppercase', fontWeight: 800, marginBottom: '12px', letterSpacing: '0.5px' }}>Eligibility Criteria</div>
