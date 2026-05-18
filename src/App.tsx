@@ -12,16 +12,17 @@ import Login from './pages/Login';
 import MasterReport from './pages/MasterReport'; 
 
 const App: React.FC = () => {
-  // Global Pipeline State
+  // Global Analytics State
   const [sharedVolatility, setSharedVolatility] = useState<'Low' | 'Medium' | 'High' | null>(null);
-  const [uploadedDocument, setUploadedDocument] = useState<string | null>(null);
+  const [liveContext, setLiveContext] = useState<any>(null);
   
   // Global Evidence Engine Memory
+  const [uploadedDocument, setUploadedDocument] = useState<string | null>(null);
   const [evidenceQuery, setEvidenceQuery] = useState("");
   const [evidenceResults, setEvidenceResults] = useState<any[] | null>(null);
 
-  // NEW: Global Live Context Memory
-  const [liveContext, setLiveContext] = useState<any>(null);
+  // NEW: Global Pipeline for Extracted Document Data
+  const [extractedRfp, setExtractedRfp] = useState<any>(null);
 
   return (
     <Router>
@@ -29,7 +30,17 @@ const App: React.FC = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<Layout />}>
           <Route index element={<Dashboard />} />
-          <Route path="rfp-parser" element={<RfpParser setUploadedDocument={setUploadedDocument} />} />
+          
+          {/* Parser pushes data INTO the global pipeline */}
+          <Route 
+            path="rfp-parser" 
+            element={
+              <RfpParser 
+                setUploadedDocument={setUploadedDocument} 
+                setExtractedRfp={setExtractedRfp} 
+              />
+            } 
+          />
           
           <Route 
             path="evidence" 
@@ -44,25 +55,20 @@ const App: React.FC = () => {
             } 
           />
           
-          {/* Give Climate Predictor the ability to SAVE the live data globally */}
+          {/* Predictor READS the data from the pipeline to auto-fetch */}
           <Route 
             path="climate" 
             element={
               <ClimatePredictor 
                 setSharedVolatility={setSharedVolatility} 
                 setLiveContext={setLiveContext} 
+                extractedRfp={extractedRfp}
               />
             } 
           />
           
           <Route path="consortium" element={<ConsortiumMatrix />} />
-          
-          {/* Give Systems Modeler the ability to READ the live data globally */}
-          <Route 
-            path="systems" 
-            element={<SystemsModeler liveContext={liveContext} />} 
-          />
-          
+          <Route path="systems" element={<SystemsModeler liveContext={liveContext} />} />
           <Route 
             path="monte-carlo" 
             element={

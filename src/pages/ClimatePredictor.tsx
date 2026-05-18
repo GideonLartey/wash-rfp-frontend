@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 
-// Define the shape of the data we expect from your FastAPI backend
 interface LiveContextData {
   country: string;
   water_stress_index: number;
@@ -12,69 +11,74 @@ interface LiveContextData {
 const ClimatePredictor: React.FC<{ 
   setSharedVolatility?: (v: 'Low' | 'Medium' | 'High') => void;
   setLiveContext?: (data: LiveContextData | null) => void; 
-}> = ({ setSharedVolatility, setLiveContext }) => {
+  extractedRfp?: any; // NEW: The incoming data from the pipeline
+}> = ({ setSharedVolatility, setLiveContext, extractedRfp }) => {
   const theme = {
     surface: '#141414', border: '#262626', textPrimary: '#F5F5F5',
     textSecondary: '#A3A3A3', accent: '#3B82F6', success: '#10B981',
     warning: '#F59E0B', danger: '#EF4444', bgLight: '#1A1F26'
   };
 
-  // Check session storage for existing data on load
   const savedState = JSON.parse(sessionStorage.getItem('cp_state') || 'null');
 
   const [environment, setEnvironment] = useState<'Rural' | 'Urban'>(savedState?.environment || 'Rural');
   const [climateRisk, setClimateRisk] = useState<'Drought' | 'Flood'>(savedState?.climateRisk || 'Drought');
   const [targetPopulation, setTargetPopulation] = useState<number>(savedState?.targetPopulation || 50000);
   
-  // States for the Live API
-  const [countrySearch, setCountrySearch] = useState<string>('');
+  const [countrySearch, setCountrySearch] = useState<string>(savedState?.countrySearch || '');
   const [isFetching, setIsFetching] = useState(false);
   const [liveData, setLiveData] = useState<LiveContextData | null>(savedState?.liveData || null);
+  
+  // A flag to ensure we don't get trapped in an infinite fetch loop
+  const [autoFetched, setAutoFetched] = useState(savedState?.autoFetched || false);
 
-  // Sync state to sessionStorage whenever a user changes anything
   useEffect(() => {
     sessionStorage.setItem('cp_state', JSON.stringify({ 
-      environment, 
-      climateRisk, 
-      targetPopulation,
-      liveData 
+      environment, climateRisk, targetPopulation, liveData, countrySearch, autoFetched 
     }));
     
-    // Push the volatility to the Monte Carlo simulator
     if (setSharedVolatility) {
         setSharedVolatility(climateRisk === 'Drought' ? 'High' : 'Medium');
     }
-  }, [environment, climateRisk, targetPopulation, liveData, setSharedVolatility]);
+  }, [environment, climateRisk, targetPopulation, liveData, countrySearch, autoFetched, setSharedVolatility]);
 
-  // THE ORACLE ENGINE: Fetch data from your Python Backend
-  const handleFetchContext = async () => {
-    if (!countrySearch.trim()) return;
+  // Refactored the core fetch logic into a reusable function
+  const executeFetch = async (query: string) => {
+    if (!query.trim()) return;
     setIsFetching(true);
     
     try {
-      const response = await fetch(`https://wash-ai.onrender.com/api/context/${countrySearch}`);
-      
+      const response = await fetch(`https://wash-ai.onrender.com/api/context/${query}`);
       if (!response.ok) throw new Error("Failed to fetch context");
       
       const data: LiveContextData = await response.json();
       setLiveData(data);
       
-      // Send this data to the global App.tsx pipeline!
-      if (setLiveContext) {
-        setLiveContext(data);
-      }
+      if (setLiveContext) setLiveContext(data);
       
-      // Auto-Adjust the sliders based on the AI's return data!
       setClimateRisk(data.primary_climate_risk === 'Flood' ? 'Flood' : 'Drought');
       setEnvironment(data.infrastructure_baseline > 50 ? 'Urban' : 'Rural');
       
     } catch (error) {
       console.error("API Error:", error);
-      alert("Could not connect to the Live Context Engine. Make sure your Render backend is awake!");
     } finally {
       setIsFetching(false);
     }
   };
+
+  const handleManualFetchContext = () => executeFetch(countrySearch);
+
+  // --- NEW: AUTONOMOUS TRIGGER ENGINE ---
+  useEffect(() => {
+    // If we have an incoming target from the RFP parser, AND we haven't already fetched it...
+    if (extractedRfp && extractedRfp.target_demographics && !autoFetched && !liveData) {
+      const targetCountry = extractedRfp.target_demographics;
+      setCountrySearch(targetCountry); // Fill the search bar for the user
+      setAutoFetched(true);            // Lock the auto-fetcher
+      executeFetch(targetCountry);     // Fire the Python backend immediately
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [extractedRfp, autoFetched, liveData]);
 
   const resetPredictor = () => {
     setEnvironment('Rural');
@@ -82,6 +86,7 @@ const ClimatePredictor: React.FC<{
     setTargetPopulation(50000);
     setLiveData(null);
     setCountrySearch('');
+    setAutoFetched(false); // Unlock the auto-fetcher on reset
     sessionStorage.removeItem('cp_state');
     if (setLiveContext) setLiveContext(null);
   };
@@ -106,7 +111,6 @@ const ClimatePredictor: React.FC<{
         </button>
       </div>
 
-      {/* LIVE DATA API SEARCH BAR */}
       <div style={{ backgroundColor: theme.surface, border: `1px solid ${theme.accent}`, borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 4px 20px rgba(59, 130, 246, 0.1)' }}>
         <h2 style={{ fontSize: '1.1rem', fontWeight: 800, margin: 0, color: theme.textPrimary, display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{ display: 'inline-block', width: '10px', height: '10px', backgroundColor: theme.accent, borderRadius: '50%' }}></span>
@@ -118,11 +122,11 @@ const ClimatePredictor: React.FC<{
             placeholder="Enter target country (e.g., Mali, Kenya, Bangladesh)..." 
             value={countrySearch}
             onChange={(e) => setCountrySearch(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleFetchContext()}
+            onKeyDown={(e) => e.key === 'Enter' && handleManualFetchContext()}
             style={{ flex: 1, padding: '12px 16px', borderRadius: '8px', border: `1px solid ${theme.border}`, backgroundColor: '#0A0A0A', color: theme.textPrimary, fontSize: '1rem' }}
           />
           <button 
-            onClick={handleFetchContext}
+            onClick={handleManualFetchContext}
             disabled={isFetching}
             style={{ padding: '0 24px', backgroundColor: theme.accent, color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 800, cursor: isFetching ? 'wait' : 'pointer', transition: 'opacity 0.2s', opacity: isFetching ? 0.7 : 1 }}
           >
@@ -130,7 +134,6 @@ const ClimatePredictor: React.FC<{
           </button>
         </div>
 
-        {/* Display Fetched Data if it exists */}
         {liveData && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginTop: '16px', padding: '16px', backgroundColor: theme.bgLight, borderRadius: '8px', border: `1px solid ${theme.border}` }}>
             <div>
@@ -153,7 +156,6 @@ const ClimatePredictor: React.FC<{
         )}
       </div>
 
-      {/* MANUAL OVERRIDE CONTROLS */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
         
         <div style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '32px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -214,7 +216,6 @@ const ClimatePredictor: React.FC<{
           </div>
         </div>
 
-        {/* DYNAMIC OUTPUT ARCHITECTURE */}
         <div style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '32px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
           <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, borderBottom: `1px solid ${theme.border}`, paddingBottom: '16px' }}>Recommended Architecture</h2>
           

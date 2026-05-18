@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 
 interface RfpParserProps {
   setUploadedDocument: (doc: string | null) => void;
+  setExtractedRfp?: (data: any) => void; // Added the pipeline prop
 }
 
-const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument }) => {
+const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument, setExtractedRfp }) => {
   const theme = {
     surface: '#141414', border: '#262626', textPrimary: '#F5F5F5',
     textSecondary: '#A3A3A3', accent: '#3B82F6', success: '#10B981', 
@@ -23,12 +24,18 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument }) => {
     const cachedFileName = sessionStorage.getItem('rfpFileName');
     
     if (cachedData && cachedFileName) {
-      setParsedData(JSON.parse(cachedData));
+      const parsed = JSON.parse(cachedData);
+      setParsedData(parsed);
       setFileName(cachedFileName);
       setShowSuccessIcon(true);
       setUploadedDocument(cachedFileName);
+      
+      // NEW: Restore the pipeline memory if the user refreshes the page
+      if (setExtractedRfp) {
+        setExtractedRfp({ target_demographics: parsed.demographics });
+      }
     }
-  }, [setUploadedDocument]);
+  }, [setUploadedDocument, setExtractedRfp]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -82,7 +89,6 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument }) => {
             `Project Title: ${meta.title || "Unknown WASH Project"}`,
             `Submission Target Email: ${meta.submission_email || "No email detected"}`
           ],
-          // New endpoints ready for updated main.py schema
           contractValue: meta.contract_value || null,
           eligibility: meta.eligibility_criteria || null,
           duration: meta.project_duration || null,
@@ -91,6 +97,11 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument }) => {
         };
 
         setParsedData(extractedPayload);
+        
+        // NEW: Push the raw metadata up to the Global Pipeline so Climate Predictor can catch it
+        if (setExtractedRfp) {
+            setExtractedRfp(meta);
+        }
         
         // Cache data locally 
         sessionStorage.setItem('rfpParsedData', JSON.stringify(extractedPayload));
@@ -133,7 +144,6 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument }) => {
         </p>
       </div>
 
-      {/* Auto-fit responsive grid for mobile compatibility */}
       <div style={{ display: 'grid', gridTemplateColumns: parsedData ? 'repeat(auto-fit, minmax(320px, 1fr))' : '1fr', gap: '24px', alignItems: 'start', transition: 'all 0.5s ease' }}>
         
         {/* UPLOAD SECTION */}
@@ -227,7 +237,6 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument }) => {
                 <div style={{ fontSize: '0.95rem', color: theme.warning, fontWeight: 600 }}>{parsedData.closingDate}</div>
               </div>
               
-              {/* NEW SUB-CARDS (Rendered conditionally if backend provides them) */}
               {parsedData.contractValue && (
                 <div style={{ border: `1px solid ${theme.border}`, borderRadius: '8px', padding: '12px', backgroundColor: '#0A0A0A' }}>
                   <div style={{ fontSize: '0.7rem', color: theme.textSecondary, textTransform: 'uppercase', fontWeight: 800, marginBottom: '4px' }}>Contract Value</div>
@@ -255,7 +264,7 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument }) => {
               </div>
             </div>
 
-            {/* ADDITIONAL WASH FIELDS (Rendered conditionally) */}
+            {/* ADDITIONAL WASH FIELDS */}
             {parsedData.eligibility && (
               <div>
                 <div style={{ fontSize: '0.8rem', color: theme.textSecondary, textTransform: 'uppercase', fontWeight: 800, marginBottom: '12px', letterSpacing: '0.5px' }}>Eligibility Criteria</div>
