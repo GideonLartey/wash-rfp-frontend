@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 const SystemsModeler: React.FC = () => {
   const theme = {
@@ -7,10 +7,8 @@ const SystemsModeler: React.FC = () => {
     warning: '#F59E0B', danger: '#EF4444'
   };
 
-  // Check session storage for existing data on load
   const savedState = JSON.parse(sessionStorage.getItem('sm_state') || 'null');
 
-  // Core WASH Systems Building Blocks
   const [blocks, setBlocks] = useState(savedState || {
     policy: 40,
     institutions: 30,
@@ -20,8 +18,37 @@ const SystemsModeler: React.FC = () => {
   });
 
   const [transformationScore, setTransformationScore] = useState(0);
+  const [connectionStatus, setConnectionStatus] = useState<'Connecting...' | 'Live Collaboration Active' | 'Disconnected'>('Connecting...');
+  
+  // Create a persistent reference to the WebSocket connection
+  const ws = useRef<WebSocket | null>(null);
 
-  // Sync state to sessionStorage whenever a user changes a slider
+  // --- NEW: WEBSOCKET MULTIPLAYER CONNECTION ---
+  useEffect(() => {
+    // Connect to the Render backend using the secure WebSocket protocol (wss://)
+    // We are putting everyone in a shared room called 'global-bid-room'
+    ws.current = new WebSocket('wss://wash-ai.onrender.com/ws/collaborate/global-bid-room');
+
+    ws.current.onopen = () => setConnectionStatus('Live Collaboration Active');
+    ws.current.onclose = () => setConnectionStatus('Disconnected');
+
+    // Listen for slider movements from other users
+    ws.current.onmessage = (event) => {
+      try {
+        const incomingState = JSON.parse(event.data);
+        setBlocks(incomingState);
+      } catch (e) {
+        console.error("Failed to parse incoming multiplayer data");
+      }
+    };
+
+    // Cleanup the connection when the user leaves the page
+    return () => {
+      if (ws.current) ws.current.close();
+    };
+  }, []);
+
+  // Sync state to sessionStorage
   useEffect(() => {
     sessionStorage.setItem('sm_state', JSON.stringify(blocks));
   }, [blocks]);
@@ -30,16 +57,20 @@ const SystemsModeler: React.FC = () => {
   useEffect(() => {
     const governanceAverage = (blocks.policy + blocks.institutions + blocks.finance + blocks.monitoring) / 4;
     const gap = Math.abs(blocks.infrastructure - governanceAverage);
-    
     const baseScore = (blocks.policy + blocks.institutions + blocks.finance + blocks.infrastructure + blocks.monitoring) / 5;
     const penalty = gap > 30 ? (gap * 0.5) : 0; 
-    
     const finalScore = Math.max(0, Math.min(100, Math.round(baseScore - penalty)));
     setTransformationScore(finalScore);
   }, [blocks]);
 
   const handleSlider = (block: keyof typeof blocks, value: number) => {
-    setBlocks((prev: any) => ({ ...prev, [block]: value }));
+    const newBlocks = { ...blocks, [block]: value };
+    setBlocks(newBlocks);
+    
+    // Broadcast the new slider positions to anyone else looking at this page!
+    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+      ws.current.send(JSON.stringify(newBlocks));
+    }
   };
 
   const getScoreColor = (score: number) => {
@@ -49,8 +80,13 @@ const SystemsModeler: React.FC = () => {
   };
 
   const resetModeler = () => {
-    setBlocks({ policy: 40, institutions: 30, finance: 20, infrastructure: 70, monitoring: 25 });
+    const resetState = { policy: 40, institutions: 30, finance: 20, infrastructure: 70, monitoring: 25 };
+    setBlocks(resetState);
     sessionStorage.removeItem('sm_state');
+    
+    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+      ws.current.send(JSON.stringify(resetState));
+    }
   };
 
   return (
@@ -61,6 +97,10 @@ const SystemsModeler: React.FC = () => {
           <p style={{ color: theme.textSecondary, marginTop: '8px', fontSize: '1rem', lineHeight: '1.5', maxWidth: '800px' }}>
             Simulate transformational WASH programme delivery. Adjust system building blocks to project long-term outcomes.
           </p>
+          <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', fontWeight: 700, color: connectionStatus === 'Live Collaboration Active' ? theme.success : theme.warning }}>
+            <span style={{ display: 'inline-block', width: '8px', height: '8px', backgroundColor: connectionStatus === 'Live Collaboration Active' ? theme.success : theme.warning, borderRadius: '50%', boxShadow: `0 0 8px ${connectionStatus === 'Live Collaboration Active' ? theme.success : theme.warning}` }}></span>
+            {connectionStatus}
+          </div>
         </div>
         <button 
           onClick={resetModeler}
