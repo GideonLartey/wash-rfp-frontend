@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-const SystemsModeler: React.FC = () => {
+const SystemsModeler: React.FC<{ liveContext?: any }> = ({ liveContext }) => {
   const theme = {
     surface: '#141414', border: '#262626', textPrimary: '#F5F5F5',
     textSecondary: '#A3A3A3', accent: '#3B82F6', success: '#10B981',
@@ -23,10 +23,26 @@ const SystemsModeler: React.FC = () => {
   // Create a persistent reference to the WebSocket connection
   const ws = useRef<WebSocket | null>(null);
 
-  // --- NEW: WEBSOCKET MULTIPLAYER CONNECTION ---
+  // AUTO-ADJUST SLIDERS BASED ON CLIMATE PREDICTOR DATA
+  useEffect(() => {
+    if (liveContext) {
+      const newBlocks = {
+        ...blocks,
+        institutions: liveContext.governance_score,
+        infrastructure: liveContext.infrastructure_baseline
+      };
+      setBlocks(newBlocks);
+      
+      // If we are in multiplayer mode, broadcast this automatic adjustment to the team!
+      if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+        ws.current.send(JSON.stringify(newBlocks));
+      }
+    }
+  }, [liveContext]);
+
+  // WEBSOCKET MULTIPLAYER CONNECTION
   useEffect(() => {
     // Connect to the Render backend using the secure WebSocket protocol (wss://)
-    // We are putting everyone in a shared room called 'global-bid-room'
     ws.current = new WebSocket('wss://wash-ai.onrender.com/ws/collaborate/global-bid-room');
 
     ws.current.onopen = () => setConnectionStatus('Live Collaboration Active');

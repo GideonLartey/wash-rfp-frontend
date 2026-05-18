@@ -20,6 +20,9 @@ const App: React.FC = () => {
   const [evidenceQuery, setEvidenceQuery] = useState("");
   const [evidenceResults, setEvidenceResults] = useState<any[] | null>(null);
 
+  // NEW: Global Live Context Memory
+  const [liveContext, setLiveContext] = useState<any>(null);
+
   return (
     <Router>
       <Routes>
@@ -28,7 +31,6 @@ const App: React.FC = () => {
           <Route index element={<Dashboard />} />
           <Route path="rfp-parser" element={<RfpParser setUploadedDocument={setUploadedDocument} />} />
           
-          {/* Passing the global memory down into the Evidence Engine */}
           <Route 
             path="evidence" 
             element={
@@ -42,9 +44,25 @@ const App: React.FC = () => {
             } 
           />
           
-          <Route path="climate" element={<ClimatePredictor setSharedVolatility={setSharedVolatility} />} />
+          {/* Give Climate Predictor the ability to SAVE the live data globally */}
+          <Route 
+            path="climate" 
+            element={
+              <ClimatePredictor 
+                setSharedVolatility={setSharedVolatility} 
+                setLiveContext={setLiveContext} 
+              />
+            } 
+          />
+          
           <Route path="consortium" element={<ConsortiumMatrix />} />
-          <Route path="systems" element={<SystemsModeler />} />
+          
+          {/* Give Systems Modeler the ability to READ the live data globally */}
+          <Route 
+            path="systems" 
+            element={<SystemsModeler liveContext={liveContext} />} 
+          />
+          
           <Route 
             path="monte-carlo" 
             element={
@@ -54,10 +72,7 @@ const App: React.FC = () => {
               />
             } 
           />
-          
-          {/* ROUTE FOR THE NEW PAGE */}
           <Route path="master-report" element={<MasterReport />} />
-          
         </Route>
       </Routes>
     </Router>

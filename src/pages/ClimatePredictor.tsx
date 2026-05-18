@@ -9,21 +9,24 @@ interface LiveContextData {
   infrastructure_baseline: number;
 }
 
-const ClimatePredictor: React.FC<{ setSharedVolatility?: (v: 'Low' | 'Medium' | 'High') => void }> = ({ setSharedVolatility }) => {
+const ClimatePredictor: React.FC<{ 
+  setSharedVolatility?: (v: 'Low' | 'Medium' | 'High') => void;
+  setLiveContext?: (data: LiveContextData | null) => void; 
+}> = ({ setSharedVolatility, setLiveContext }) => {
   const theme = {
     surface: '#141414', border: '#262626', textPrimary: '#F5F5F5',
     textSecondary: '#A3A3A3', accent: '#3B82F6', success: '#10B981',
     warning: '#F59E0B', danger: '#EF4444', bgLight: '#1A1F26'
   };
 
-  // Check session storage for existing data on load (Crucial for the Master Report!)
+  // Check session storage for existing data on load
   const savedState = JSON.parse(sessionStorage.getItem('cp_state') || 'null');
 
   const [environment, setEnvironment] = useState<'Rural' | 'Urban'>(savedState?.environment || 'Rural');
   const [climateRisk, setClimateRisk] = useState<'Drought' | 'Flood'>(savedState?.climateRisk || 'Drought');
   const [targetPopulation, setTargetPopulation] = useState<number>(savedState?.targetPopulation || 50000);
   
-  // New States for the Live API
+  // States for the Live API
   const [countrySearch, setCountrySearch] = useState<string>('');
   const [isFetching, setIsFetching] = useState(false);
   const [liveData, setLiveData] = useState<LiveContextData | null>(savedState?.liveData || null);
@@ -37,7 +40,7 @@ const ClimatePredictor: React.FC<{ setSharedVolatility?: (v: 'Low' | 'Medium' | 
       liveData 
     }));
     
-    // Also push the volatility to the Monte Carlo simulator if the prop exists
+    // Push the volatility to the Monte Carlo simulator
     if (setSharedVolatility) {
         setSharedVolatility(climateRisk === 'Drought' ? 'High' : 'Medium');
     }
@@ -49,13 +52,17 @@ const ClimatePredictor: React.FC<{ setSharedVolatility?: (v: 'Low' | 'Medium' | 
     setIsFetching(true);
     
     try {
-      // Connects directly to the endpoint we added to main.py on Render
       const response = await fetch(`https://wash-ai.onrender.com/api/context/${countrySearch}`);
       
       if (!response.ok) throw new Error("Failed to fetch context");
       
       const data: LiveContextData = await response.json();
       setLiveData(data);
+      
+      // Send this data to the global App.tsx pipeline!
+      if (setLiveContext) {
+        setLiveContext(data);
+      }
       
       // Auto-Adjust the sliders based on the AI's return data!
       setClimateRisk(data.primary_climate_risk === 'Flood' ? 'Flood' : 'Drought');
@@ -76,6 +83,7 @@ const ClimatePredictor: React.FC<{ setSharedVolatility?: (v: 'Low' | 'Medium' | 
     setLiveData(null);
     setCountrySearch('');
     sessionStorage.removeItem('cp_state');
+    if (setLiveContext) setLiveContext(null);
   };
 
   return (
@@ -98,7 +106,7 @@ const ClimatePredictor: React.FC<{ setSharedVolatility?: (v: 'Low' | 'Medium' | 
         </button>
       </div>
 
-      {/* --- NEW: LIVE DATA API SEARCH BAR --- */}
+      {/* LIVE DATA API SEARCH BAR */}
       <div style={{ backgroundColor: theme.surface, border: `1px solid ${theme.accent}`, borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 4px 20px rgba(59, 130, 246, 0.1)' }}>
         <h2 style={{ fontSize: '1.1rem', fontWeight: 800, margin: 0, color: theme.textPrimary, display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{ display: 'inline-block', width: '10px', height: '10px', backgroundColor: theme.accent, borderRadius: '50%' }}></span>
@@ -145,7 +153,7 @@ const ClimatePredictor: React.FC<{ setSharedVolatility?: (v: 'Low' | 'Medium' | 
         )}
       </div>
 
-      {/* --- MANUAL OVERRIDE CONTROLS --- */}
+      {/* MANUAL OVERRIDE CONTROLS */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
         
         <div style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '32px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -206,7 +214,7 @@ const ClimatePredictor: React.FC<{ setSharedVolatility?: (v: 'Low' | 'Medium' | 
           </div>
         </div>
 
-        {/* --- DYNAMIC OUTPUT ARCHITECTURE --- */}
+        {/* DYNAMIC OUTPUT ARCHITECTURE */}
         <div style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '32px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
           <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, borderBottom: `1px solid ${theme.border}`, paddingBottom: '16px' }}>Recommended Architecture</h2>
           
