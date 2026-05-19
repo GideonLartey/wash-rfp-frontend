@@ -66,6 +66,7 @@ extractedRfp (Extracted metadata and geographic targets)
 
 When a document is parsed, setExtractedRfp updates the global coordinate system. Downstream systems, like the ClimatePredictor, observe this transition, locking their queries and executing auto-fetch operations with zero manual operator intervention.
 
+
 ## Persistent State & Session Cache
 
 To prevent loss of critical data during navigation shifts, page refreshes, or browser tab changes, the client-side system uses a dual-layer state synchronization model:
@@ -126,9 +127,14 @@ VITE_API_URL=http://localhost:8000
 npm run dev
 ```
 
-## NOTE:AI API Usage & Cost Optimization
+## 📝NOTE:AI API Usage & Cost Optimization
 
 To manage API consumption during the development and prototyping phase, the LogFrame Matrix and Climate Predictor component currently utilizes a structured mock-data. This ensures high-velocity testing of the UI/UX components without incurring unnecessary API token costs. The production-ready backend is already engineered to route these requests to the Gemini 2.5 Flash model for dynamic, RFP-specific output once you decide to deploy in a production environment with a configured billing tier.
+
+
+## 😒 Project Constraints( Weird behaviour of the Monte Carlo Simulator line curve in batch PDFexport )
+
+During the batch PDF generation process, the platform handles high-density histogram rendering from the Monte Carlo simulator window very well. However, line curves may produce unusual and weird behaviour. Switch to the histogram view before export. I will actively work on this to get it working at full capacity.
 
 
 ## 📂 Project Structure
