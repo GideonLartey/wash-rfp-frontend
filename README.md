@@ -123,7 +123,7 @@ OpenWsh-Control/
 ├── wash-rfp-backend/
 │   ├── main.py
 │   ├── requirements.txt
-│   └── .env.example
+│   └── .gitignore
 └── wash-rfp-frontend/
     ├── node_modules/
     ├── public/
@@ -148,7 +148,6 @@ OpenWsh-Control/
     │   ├── App.tsx
     │   ├── index.css
     │   └── main.tsx
-    ├── .env
     ├── .gitignore
     ├── eslint.config.js
     ├── index.html
@@ -195,13 +194,11 @@ OpenWsh-Control/
 
 ## 🗺️ Future Enhancements
 
-Export as PDF: Implement native canvas-to-pdf libraries to export the Master Analysis Report.
-
 Persistent Storage: Integrate a PostgreSQL database cluster to manage and secure multi-user persistent workspaces.
 
 Optimized Cache Layers: Incorporate a Redis memory database in the API layer for high-speed, localized query caching.
 
-Live Donor Telemetry: Replace mock dictionaries with dynamic HTTP queries linked directly to official UN, JMP, and global donor data APIs.
+Live Donor Telemetry: Replace mock dictionaries with dynamic HTTP queries linked directly to official global donor data APIs.
 
 
 ## 📄 License & Authors
