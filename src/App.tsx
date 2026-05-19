@@ -10,6 +10,7 @@ import MonteCarloSimulator from './pages/MonteCarloSimulator';
 import RfpParser from './pages/RfpParser';
 import Login from './pages/Login';
 import MasterReport from './pages/MasterReport'; 
+import LogFrameMatrix from './pages/LogFrameMatrix'; // 1. NEW IMPORT
 
 const App: React.FC = () => {
   // Global Analytics State
@@ -79,6 +80,10 @@ const App: React.FC = () => {
             } 
           />
           <Route path="master-report" element={<MasterReport />} />
+          
+          {/* 2. NEW ROUTE: Automated LogFrame Matrix */}
+          <Route path="logframe" element={<LogFrameMatrix />} />
+          
         </Route>
       </Routes>
     </Router>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // 1. NEW IMPORT
 
 interface RfpParserProps {
   setUploadedDocument: (doc: string | null) => void;
@@ -6,6 +7,8 @@ interface RfpParserProps {
 }
 
 const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument, setExtractedRfp }) => {
+  const navigate = useNavigate(); // 2. INITIALIZE ROUTER
+  
   const theme = {
     surface: '#141414', border: '#262626', textPrimary: '#F5F5F5',
     textSecondary: '#A3A3A3', accent: '#3B82F6', success: '#10B981', 
@@ -29,7 +32,6 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument, setExtracted
       setShowSuccessIcon(true);
       setUploadedDocument(cachedFileName);
       
-      // Keep pipeline active on refresh using the clean primary country
       if (setExtractedRfp) {
         setExtractedRfp({ target_demographics: parsed.primaryCountry });
       }
@@ -91,13 +93,12 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument, setExtracted
           eligibility: meta.eligibility_criteria || null,
           duration: meta.project_duration || null,
           demographics: meta.target_demographics || null,
-          primaryCountry: meta.primary_country || null, // NEW: Capture the clean country
+          primaryCountry: meta.primary_country || null,
           deliverables: meta.key_deliverables || null
         };
 
         setParsedData(extractedPayload);
         
-        // THE FIX: Push ONLY the clean, strict country name up to the pipeline
         if (setExtractedRfp) {
             setExtractedRfp({ target_demographics: meta.primary_country || meta.target_demographics });
         }
@@ -283,6 +284,26 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument, setExtracted
                 </div>
               </div>
             )}
+
+            {/* 3. NEW: THE LOGFRAME BRIDGE BUTTON */}
+            <div style={{ marginTop: '16px', borderTop: `1px solid ${theme.border}`, paddingTop: '24px' }}>
+              <button 
+                onClick={() => {
+                  // We pass the parsed data through the router state so the next page can use it instantly
+                  navigate('/logframe', { state: { rfpData: parsedData } });
+                }}
+                style={{ 
+                  width: '100%', padding: '16px', backgroundColor: 'transparent', color: theme.accent, 
+                  border: `2px solid ${theme.accent}`, borderRadius: '8px', fontSize: '0.9rem',
+                  fontWeight: 800, letterSpacing: '0.5px', cursor: 'pointer', transition: 'all 0.2s',
+                  display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px'
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = theme.accent; e.currentTarget.style.color = '#fff'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = theme.accent; }}
+              >
+                ⚙️ GENERATE LOGFRAME MATRIX
+              </button>
+            </div>
 
           </div>
         )}
