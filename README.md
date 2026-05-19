@@ -157,21 +157,34 @@ OpenWsh-Control/
 ```
 
 
-## Application Preview
+## 📸 Application Preview
 
+## overview & rfpParser
 
+<p align="center">
+  <img src="./src/assets/overview.png" width="45%" />
+  <img src="./src/assets/rfpparser.png" width="45%" />
+</p>
 
+## climatePredictor & evidenceEngine
 
+<p align="center">
+  <img src="./src/assets/evidence.png" width="45%" />
+  <img src="./src/assets/climatepredictor.png" width="45%" />
+</p>
 
+## consortiumMatrix & systemsModeler
 
+<p align="center">
+  <img src="./src/assets/consortium.png" width="45%" />
+  <img src="./src/assets/systemsmodeler.png" width="45%" />
+</p>
 
-
-
-
-
-
-
-
+## livetracker & monteCarloSimulator
+<p align="center">
+  <img src="./src/assets/montecarlo.png" width="45%" />
+  <img src="./src/assets/livetracker.png" width="45%" />
+</p>
 
 
 ## 🗺️ Future Enhancements
