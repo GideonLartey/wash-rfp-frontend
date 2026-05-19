@@ -26,6 +26,7 @@ const LogFrameMatrix: React.FC = () => {
       const budgetSource = rfpData?.budget || 'Strategic Partners';
       
       // Mocked AI Output mapped to standard WASH LogFrame standards
+      // To switch to live AI synthesis, replace this object with a fetch() call to the backend /api/generate-logframe endpoint.
       setMatrixData([
         {
           level: '1. Strategic Impact (Goal)',

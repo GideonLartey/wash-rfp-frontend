@@ -12,7 +12,7 @@
 
 A comprehensive, full-stack analytics and processing prototype designed for the Water, Sanitation, and Hygiene (WASH) sector. OpenWSH-CONTROL provides technical teams, directors, and researchers with autonomous RFP data extraction, macro-indicator context fetching, systems strengthening recommendations, an integrated climate prediction engine, and real-time multiplayer system modeling.
 
-🔗 Live Deployment: https://www.openwsh-control.xyz
+🔗 Live Deployment: https://wash-rfp-frontend.vercel.app
 
 
 ## 🌟 Key Features
@@ -41,6 +41,15 @@ WebSocket Integration: Uses secure FastAPI WebSocket connections to broadcast wo
 
 Audit-Ready Aggregator: Consolidates all extracted parameters, environmental baselines, and modeling metrics into an extensive, printable layout designed to satisfy institutional compliance and reporting guidelines.
 
+## 🗺️ GeoJSON Ingestion: 
+
+GeoJSON map addition: Implements a native FileReader pipeline allowing real-time rendering of custom boundary shapefiles and borehole networks directly onto the dashboard. Project later migrated from a static marker-based component to an interactive React-Leaflet GIS workspace.
+
+## 🪵 LogFrame Matrix Engine: 
+
+Develops a new dedicated workspace (/logframe) that generates an automated, audit-ready logical framework matrix based on parsed RFP metadata.
+
+
 ## 🏗️ Technical Architecture
 
 Client-Side Data Pipeline & Global Memory
@@ -67,6 +76,7 @@ Upon mounting, lifecycle hooks check the cache to decode and hydrate the interfa
 
 An explicit "Reset" control is exposed to clear cached states on demand without disrupting core pipeline variables.
 
+
 ## 💻 System Requirements
 
 Frontend Build Engine: Node.js v18+ (utilizing npm or yarn package managers)
@@ -74,6 +84,7 @@ Frontend Build Engine: Node.js v18+ (utilizing npm or yarn package managers)
 Backend Runtime: Python v3.9+ (utilizing pip and virtual environments)
 
 AI Processing Keys: Active access to the Google Gemini API (or compatible AI model engines)
+
 
 ## 🚀 Installation & Setup
 
@@ -115,6 +126,11 @@ VITE_API_URL=http://localhost:8000
 npm run dev
 ```
 
+## NOTE:AI API Usage & Cost Optimization
+
+To manage API consumption during the development and prototyping phase, the LogFrame Matrix currently utilizes a structured mock-data. This ensures high-velocity testing of the UI/UX components without incurring unnecessary API 
+token costs. The production-ready backend is already engineered to route these requests to the Gemini 2.5 Flash model for dynamic, RFP-specific output once you decide to deploy in a production environment with a configured billing tier.
+
 
 ## 📂 Project Structure
 
@@ -140,6 +156,7 @@ OpenWsh-Control/
     │   │   ├── ConsortiumMatrix.tsx
     │   │   ├── Dashboard.tsx
     │   │   ├── EvidenceEngine.tsx
+    │   │   ├── LogFrameMatrix.tsx
     │   │   ├── Login.tsx
     │   │   ├── MasterReport.tsx
     │   │   ├── MonteCarloSimulator.tsx
@@ -167,7 +184,7 @@ OpenWsh-Control/
 ## overview & rfpParser
 
 <p align="center">
-  <img src="./src/assets/overview.png" width="45%" />
+  <img src="./src/assets/commandcentreoverview.png" width="45%" />
   <img src="./src/assets/rfpparser.png" width="45%" />
 </p>
 
@@ -190,6 +207,13 @@ OpenWsh-Control/
   <img src="./src/assets/montecarlo.png" width="45%" />
   <img src="./src/assets/livetracker.png" width="45%" />
 </p>
+
+## logFrameMatrix & samplebatchdownload
+<p align="center">
+  <img src="./src/assets/logframe.png" width="45%" />
+  <img src="./src/assets/samplebatchdownload.png" width="45%" />
+</p>
+
 
 
 ## 🗺️ Future Enhancements
