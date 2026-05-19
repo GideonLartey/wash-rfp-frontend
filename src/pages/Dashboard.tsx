@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapContainer, TileLayer, CircleMarker, Popup, Polyline, Marker } from 'react-leaflet';
+import { MapContainer, TileLayer, CircleMarker, Popup, Polyline, Marker, GeoJSON } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -39,6 +39,10 @@ const Dashboard: React.FC = () => {
   
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [showIndividualModal, setShowIndividualModal] = useState(false);
+  
+  // NEW STATE: GeoJSON Data
+  const [geoData, setGeoData] = useState<any | null>(null);
+  const [mapKey, setMapKey] = useState(0);
 
   const theme = {
     surface: '#141414', textPrimary: '#F5F5F5', textSecondary: '#A3A3A3',
@@ -82,6 +86,33 @@ const Dashboard: React.FC = () => {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  };
+
+  // NEW HANDLER: Parse uploaded GeoJSON file
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const json = JSON.parse(e.target?.result as string);
+        setGeoData(json);
+        setMapKey(prev => prev + 1);
+      } catch (error) {
+        console.error("Invalid GeoJSON file", error);
+        alert("Could not parse file. Please ensure it is a valid .geojson format.");
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const geoJsonStyle = {
+    color: theme.accent, 
+    weight: 2,
+    opacity: 0.8,
+    fillColor: theme.accent,
+    fillOpacity: 0.2,
   };
 
   return (
@@ -168,7 +199,34 @@ const Dashboard: React.FC = () => {
         ))}
       </div>
 
-      <div style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', overflow: 'hidden', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+        
+        {/* NEW OVERLAY: GeoJSON Upload Panel */}
+        <div style={{
+          position: 'absolute', top: '90px', right: '20px', zIndex: 1000,
+          backgroundColor: 'rgba(20, 20, 20, 0.9)', padding: '12px 16px', borderRadius: '8px',
+          border: `1px solid ${theme.border}`, backdropFilter: 'blur(4px)'
+        }}>
+          <label style={{
+            display: 'inline-block', backgroundColor: theme.accent, color: '#FFF',
+            padding: '6px 12px', borderRadius: '4px', fontSize: '0.8rem',
+            fontWeight: 700, cursor: 'pointer', transition: 'background 0.2s'
+          }}>
+            + UPLOAD .GEOJSON
+            <input 
+              type="file" 
+              accept=".geojson,application/geo+json" 
+              onChange={handleFileUpload} 
+              style={{ display: 'none' }} 
+            />
+          </label>
+          {geoData && (
+            <div style={{ marginTop: '8px', fontSize: '0.75rem', color: theme.success, fontWeight: 700 }}>
+              ✓ Layer Active
+            </div>
+          )}
+        </div>
+
         <div style={{ padding: '20px 24px', borderBottom: `1px solid ${theme.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#0D0D0D', flexWrap: 'wrap', gap: '16px' }}>
           <div>
             <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, color: theme.textPrimary }}>Live GIS Funding Tracker</h2>
@@ -189,6 +247,15 @@ const Dashboard: React.FC = () => {
               url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             />
+            
+            {/* NEW RENDER: GeoJSON Layer renders on top of the base map tiles */}
+            {geoData && (
+              <GeoJSON 
+                key={mapKey} 
+                data={geoData} 
+                style={geoJsonStyle} 
+              />
+            )}
             
             {donors.map(donor => (
               <CircleMarker key={donor.id} center={donor.coords} pathOptions={{ color: donor.color, fillColor: donor.color, fillOpacity: 0.8 }} radius={6}>
