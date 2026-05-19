@@ -128,27 +128,27 @@ npm run dev
 
 ## NOTE:AI API Usage & Cost Optimization
 
-To manage API consumption during the development and prototyping phase, the LogFrame Matrix currently utilizes a structured mock-data. This ensures high-velocity testing of the UI/UX components without incurring unnecessary API 
-token costs. The production-ready backend is already engineered to route these requests to the Gemini 2.5 Flash model for dynamic, RFP-specific output once you decide to deploy in a production environment with a configured billing tier.
+To manage API consumption during the development and prototyping phase, the LogFrame Matrix and Climate Predictor component currently utilizes a structured mock-data. This ensures high-velocity testing of the UI/UX components without incurring unnecessary API token costs. The production-ready backend is already engineered to route these requests to the Gemini 2.5 Flash model for dynamic, RFP-specific output once you decide to deploy in a production environment with a configured billing tier.
 
 
 ## 📂 Project Structure
 
 ```bash
 OpenWsh-Control/
-├── wash-rfp-backend/
+├── backend/
 │   ├── main.py
 │   ├── requirements.txt
+│   ├── venv/
 │   └── .gitignore
-└── wash-rfp-frontend/
-    ├── node_modules/
+└── frontend/
+    ├── node_modules/                          
     ├── public/
     │   ├── favicon.svg
     │   └── icons.svg
     ├── src/
     │   ├── assets/
     │   ├── components/
-    │   │   ├── Layout.tsx
+    │   │   ├── Layout.tsx                          
     │   │   ├── DataDrillDown.tsx
     │   │   └── GisMapNode.tsx
     │   ├── pages/

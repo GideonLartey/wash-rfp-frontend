@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // 1. NEW IMPORT
+import { useNavigate } from 'react-router-dom'; 
 
 interface RfpParserProps {
   setUploadedDocument: (doc: string | null) => void;
@@ -7,7 +7,7 @@ interface RfpParserProps {
 }
 
 const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument, setExtractedRfp }) => {
-  const navigate = useNavigate(); // 2. INITIALIZE ROUTER
+  const navigate = useNavigate(); // INITIALIZE ROUTER
   
   const theme = {
     surface: '#141414', border: '#262626', textPrimary: '#F5F5F5',
@@ -187,7 +187,7 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument, setExtracted
                   opacity: !fileName || isParsing ? 0.5 : 1, transition: 'all 0.2s',
                 }}
               >
-                {isParsing ? 'PROCESSING...' : 'EXTRACT DATA'}
+                {isParsing ? 'PROCESSING...PLEASE WAIT' : 'EXTRACT DATA'}
               </button>
             )}
           </div>
@@ -285,11 +285,11 @@ const RfpParser: React.FC<RfpParserProps> = ({ setUploadedDocument, setExtracted
               </div>
             )}
 
-            {/* 3. NEW: THE LOGFRAME BRIDGE BUTTON */}
+            {/* THE LOGFRAME BRIDGE BUTTON */}
             <div style={{ marginTop: '16px', borderTop: `1px solid ${theme.border}`, paddingTop: '24px' }}>
               <button 
                 onClick={() => {
-                  // We pass the parsed data through the router state so the next page can use it instantly
+                  // Parse data through the router state 
                   navigate('/logframe', { state: { rfpData: parsedData } });
                 }}
                 style={{ 

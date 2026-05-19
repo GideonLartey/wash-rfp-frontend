@@ -11,7 +11,7 @@ interface DataDrillDownProps {
   nextAuditDate: string;
 }
 
-// Components accepts those properties
+
 const DataDrillDown: React.FC<DataDrillDownProps> = ({
   partnerName,
   activePrograms,

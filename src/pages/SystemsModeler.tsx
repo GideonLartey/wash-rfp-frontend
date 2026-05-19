@@ -20,7 +20,7 @@ const SystemsModeler: React.FC<{ liveContext?: any }> = ({ liveContext }) => {
   const [transformationScore, setTransformationScore] = useState(0);
   const [connectionStatus, setConnectionStatus] = useState<'Connecting...' | 'Live Collaboration Active' | 'Disconnected'>('Connecting...');
   
-  // Create a persistent reference to the WebSocket connection
+  // Reference to WebSocket connection
   const ws = useRef<WebSocket | null>(null);
 
   // AUTO-ADJUST SLIDERS BASED ON CLIMATE PREDICTOR DATA
@@ -33,7 +33,7 @@ const SystemsModeler: React.FC<{ liveContext?: any }> = ({ liveContext }) => {
       };
       setBlocks(newBlocks);
       
-      // If we are in multiplayer mode, broadcast this automatic adjustment to the team!
+      // Multiplayer mode or Concurrent users
       if (ws.current && ws.current.readyState === WebSocket.OPEN) {
         ws.current.send(JSON.stringify(newBlocks));
       }
@@ -42,13 +42,13 @@ const SystemsModeler: React.FC<{ liveContext?: any }> = ({ liveContext }) => {
 
   // WEBSOCKET MULTIPLAYER CONNECTION
   useEffect(() => {
-    // Connect to the Render backend using the secure WebSocket protocol (wss://)
+    // Connect to Render backend using the secure WebSocket protocol (wss://)
     ws.current = new WebSocket('wss://wash-ai.onrender.com/ws/collaborate/global-bid-room');
 
     ws.current.onopen = () => setConnectionStatus('Live Collaboration Active');
     ws.current.onclose = () => setConnectionStatus('Disconnected');
 
-    // Listen for slider movements from other users
+    // Listen for slider movements 
     ws.current.onmessage = (event) => {
       try {
         const incomingState = JSON.parse(event.data);
@@ -58,7 +58,7 @@ const SystemsModeler: React.FC<{ liveContext?: any }> = ({ liveContext }) => {
       }
     };
 
-    // Cleanup the connection when the user leaves the page
+    // Cleanup connection when user exists
     return () => {
       if (ws.current) ws.current.close();
     };
@@ -83,7 +83,7 @@ const SystemsModeler: React.FC<{ liveContext?: any }> = ({ liveContext }) => {
     const newBlocks = { ...blocks, [block]: value };
     setBlocks(newBlocks);
     
-    // Broadcast the new slider positions to anyone else looking at this page!
+    // Broadcast new slider positions 
     if (ws.current && ws.current.readyState === WebSocket.OPEN) {
       ws.current.send(JSON.stringify(newBlocks));
     }

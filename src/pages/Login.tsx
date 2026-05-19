@@ -5,7 +5,7 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   
-  // Track screen size for the "Clean Slate" mobile layout
+  // Track screen size for Clean Slate mobile layout
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
@@ -29,7 +29,7 @@ const Login: React.FC = () => {
   return (
     <div style={{ height: '100vh', display: 'flex', backgroundColor: '#0A0A0A', fontFamily: "'Instrument Sans', sans-serif" }}>
       
-      {/* BRANDING & VALUE PROP (Hidden entirely on mobile for the Clean Slate look) */}
+      {/* BRANDING & VALUE PROP */}
       {!isMobile && (
         <div style={{ flex: 1, borderRight: `1px solid ${theme.border}`, display: 'flex', flexDirection: 'column', padding: '60px', position: 'relative', overflow: 'hidden' }}>
           <div style={{ zIndex: 10 }}>
@@ -66,7 +66,7 @@ const Login: React.FC = () => {
       {/* AUTHENTICATION FORM */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: isMobile ? '24px' : '40px', position: 'relative' }}>
         
-        {/* Mobile-Only Header (Preserves navigation when the left branding is hidden) */}
+        {/* Mobile-Only Header */}
         {isMobile && (
           <div style={{ position: 'absolute', top: '24px', left: '24px', right: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ width: '32px', height: '32px', backgroundColor: theme.accent, borderRadius: '6px', display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 900, color: '#fff', fontSize: '1rem' }}>W</div>
@@ -117,7 +117,7 @@ const Login: React.FC = () => {
           <div style={{ marginTop: '24px', padding: '16px', backgroundColor: 'rgba(16, 185, 129, 0.05)', border: `1px solid ${theme.success}`, borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '12px' }}>
             <span style={{ fontSize: '1.5rem' }}>🔒</span>
             <div>
-              <div style={{ fontSize: '0.75rem', fontWeight: 800, color: theme.success, textTransform: 'uppercase' }}>Zero-Trust Architecture Enabled</div>
+              <div style={{ fontSize: '0.75rem', fontWeight: 800, color: theme.success, textTransform: 'uppercase' }}>Zero-Trust Sign in Enabled</div>
               <div style={{ fontSize: '0.8rem', color: theme.textSecondary, marginTop: '2px' }}>End-to-end encryption active. Session will timeout after 15 minutes of inactivity.</div>
             </div>
           </div>

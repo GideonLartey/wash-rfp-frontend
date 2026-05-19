@@ -24,10 +24,10 @@ const EvidenceEngine: React.FC<EvidenceEngineProps> = ({
   const [statusIndex, setStatusIndex] = useState(0);
   const [searchProgress, setSearchProgress] = useState(0);
   
-  // Local state to manage the visibility of the queued document
+  // Local state to manage visibility of the queued document
   const [isCleared, setIsCleared] = useState(false);
 
-  // If a new document is sent from the RFP Parser, reset the cleared state
+  // reset the cleared state
   useEffect(() => {
     setIsCleared(false);
   }, [queuedDocument]);
@@ -109,7 +109,7 @@ const EvidenceEngine: React.FC<EvidenceEngineProps> = ({
             disabled={isSearching || !globalQuery.trim()}
             style={{ padding: '10px 24px', backgroundColor: theme.accent, color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 700, cursor: isSearching || !globalQuery.trim() ? 'not-allowed' : 'pointer', opacity: isSearching || !globalQuery.trim() ? 0.5 : 1 }}
           >
-            {isSearching ? 'PROCESSING...' : 'VERIFY CONTEXT'}
+            {isSearching ? 'PROCESSING...PLEASE WAIT' : 'VERIFY CONTEXT'}
           </button>
         </div>
       </div>
@@ -123,7 +123,7 @@ const EvidenceEngine: React.FC<EvidenceEngineProps> = ({
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <span style={{ fontSize: '0.8rem', color: theme.accent, fontWeight: 700 }}>{activeDoc || 'No Document Queued'}</span>
               
-              {/* THE NEW 'X' BUTTON */}
+              {/* CLOSE OR 'X' BUTTON */}
               {activeDoc && (
                 <button 
                   onClick={handleClearDocument}

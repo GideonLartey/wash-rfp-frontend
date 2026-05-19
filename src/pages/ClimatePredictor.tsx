@@ -11,7 +11,7 @@ interface LiveContextData {
 const ClimatePredictor: React.FC<{ 
   setSharedVolatility?: (v: 'Low' | 'Medium' | 'High') => void;
   setLiveContext?: (data: LiveContextData | null) => void; 
-  extractedRfp?: any; // NEW: The incoming data from the pipeline
+  extractedRfp?: any; // incoming data from the pipeline
 }> = ({ setSharedVolatility, setLiveContext, extractedRfp }) => {
   const theme = {
     surface: '#141414', border: '#262626', textPrimary: '#F5F5F5',
@@ -29,7 +29,7 @@ const ClimatePredictor: React.FC<{
   const [isFetching, setIsFetching] = useState(false);
   const [liveData, setLiveData] = useState<LiveContextData | null>(savedState?.liveData || null);
   
-  // A flag to ensure we don't get trapped in an infinite fetch loop
+  // catching infinite fetch loop
   const [autoFetched, setAutoFetched] = useState(savedState?.autoFetched || false);
 
   useEffect(() => {
@@ -42,7 +42,7 @@ const ClimatePredictor: React.FC<{
     }
   }, [environment, climateRisk, targetPopulation, liveData, countrySearch, autoFetched, setSharedVolatility]);
 
-  // Refactored the core fetch logic into a reusable function
+  // Refactoring fetch logic into a reusable function
   const executeFetch = async (query: string) => {
     if (!query.trim()) return;
     setIsFetching(true);
@@ -68,16 +68,16 @@ const ClimatePredictor: React.FC<{
 
   const handleManualFetchContext = () => executeFetch(countrySearch);
 
-  // --- NEW: AUTONOMOUS TRIGGER ENGINE ---
+  // --- AUTONOMOUS TRIGGER ENGINE ---
   useEffect(() => {
-    // If we have an incoming target from the RFP parser, AND we haven't already fetched it...
+    
     if (extractedRfp && extractedRfp.target_demographics && !autoFetched && !liveData) {
       const targetCountry = extractedRfp.target_demographics;
-      setCountrySearch(targetCountry); // Fill the search bar for the user
-      setAutoFetched(true);            // Lock the auto-fetcher
-      executeFetch(targetCountry);     // Fire the Python backend immediately
+      setCountrySearch(targetCountry); // Fills the search bar automatically 
+      setAutoFetched(true);            // Locks the auto-fetcher
+      executeFetch(targetCountry);     // Fires the Python backend immediately
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  
   }, [extractedRfp, autoFetched, liveData]);
 
   const resetPredictor = () => {

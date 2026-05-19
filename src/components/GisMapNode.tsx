@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css'; // CRITICAL: Without this, the map tiles will scatter
+import 'leaflet/dist/leaflet.css'; 
 
-// 1. Your original animated node, saved as a reusable sub-component
+
 const RadarMarker: React.FC = () => {
   const [isHovered, setIsHovered] = useState(false);
   const accentColor = '#3B82F6';
@@ -48,14 +48,14 @@ const RadarMarker: React.FC = () => {
   );
 };
 
-// 2. The Main GIS Workspace Component
+// Main GIS Workspace Component
 const GisMapNode: React.FC = () => {
   // State to hold the uploaded GeoJSON data
   const [geoData, setGeoData] = useState<any | null>(null);
   // A key to force the map to re-render when new data is uploaded
   const [mapKey, setMapKey] = useState(0);
 
-  // 3. The Upload Handler: Reads the file and converts it to JSON
+  // Upload Handler: Reads the file and converts it to JSON
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -74,7 +74,7 @@ const GisMapNode: React.FC = () => {
     reader.readAsText(file);
   };
 
-  // GeoJSON Styling Strategy: Gives the uploaded shapes a professional enterprise look
+  // GeoJSON Styling: Gives the uploaded shapes a professional enterprise look
   const geoJsonStyle = {
     color: '#3B82F6', // Corporate Azure Blue borders
     weight: 2,

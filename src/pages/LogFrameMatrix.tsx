@@ -5,7 +5,7 @@ const LogFrameMatrix: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   
-  // Catch the data passed from the RFP Parser via React Router
+  // Catch data passed from the RFP Parser via React Router
   const rfpData = location.state?.rfpData || null;
 
   const theme = {
@@ -18,15 +18,15 @@ const LogFrameMatrix: React.FC = () => {
   const [matrixData, setMatrixData] = useState<any | null>(null);
 
   useEffect(() => {
-    // Simulate the heavy backend AI generation process (Gemini processing the LogFrame)
+    // Simulation of backend AI generation process 
     const timer = setTimeout(() => {
       
-      // We dynamically inject the parsed country and budget if available
+      // Inject the parsed country and budget if available
       const targetRegion = rfpData?.primaryCountry || rfpData?.demographics || 'the Target Region';
       const budgetSource = rfpData?.budget || 'Strategic Partners';
       
       // Mocked AI Output mapped to standard WASH LogFrame standards
-      // To switch to live AI synthesis, replace this object with a fetch() call to the backend /api/generate-logframe endpoint.
+      // AI Switch: replace with a fetch() call to the backend (/api/generate-logframe) endpoint.
       setMatrixData([
         {
           level: '1. Strategic Impact (Goal)',
@@ -58,7 +58,7 @@ const LogFrameMatrix: React.FC = () => {
         }
       ]);
       setIsGenerating(false);
-    }, 3500); // 3.5 second simulated delay for dramatic enterprise effect
+    }, 3500); 
 
     return () => clearTimeout(timer);
   }, [rfpData]);
@@ -123,7 +123,7 @@ const LogFrameMatrix: React.FC = () => {
         </div>
       ) : (
         
-        /* THE LOGFRAME MATRIX GRID */
+        /* LOGFRAME MATRIX GRID */
         <div style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}>
           
           {/* MATRIX HEADERS */}

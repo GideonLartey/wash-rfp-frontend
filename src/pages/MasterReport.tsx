@@ -7,13 +7,13 @@ const MasterReport: React.FC = () => {
   const [reportData, setReportData] = useState<any>({});
   const [cmFilter, setCmFilter] = useState<string>('All Partners');
 
-  // The Dark theme for the UI wrapper (so it matches the rest of the site)
+  
   const appTheme = {
     surface: '#141414', border: '#262626', textPrimary: '#F5F5F5',
     textSecondary: '#A3A3A3', accent: '#3B82F6'
   };
 
-  // The Light Theme specifically for the PDF document
+  // Light Theme for PDF 
   const printTheme = {
     surface: '#FFFFFF',
     bgLight: '#F9FAFB',
@@ -38,9 +38,9 @@ const MasterReport: React.FC = () => {
     setCmFilter(filter);
   }, []);
 
-  // --- RECREATE LOGIC FOR FULL DETAIL RENDERING --- //
+  // --- LOGIC FOR FULL DETAIL RENDERING --- //
 
-  // 1. Climate Logic
+  // Climate Logic
   let cpModel = ""; let cpSpecs: string[] = []; let cpRisk = "";
   if (reportData.cp && reportData.cp.environment && reportData.cp.climateRisk) {
     if (reportData.cp.environment === 'Rural') {
@@ -72,7 +72,7 @@ const MasterReport: React.FC = () => {
     }
   }
 
-  // 2. Systems Modeler Logic
+  // Systems Modeler Logic
   let smScore = 0;
   if (reportData.sm) {
     const govAvg = (reportData.sm.policy + reportData.sm.institutions + reportData.sm.finance + reportData.sm.monitoring) / 4;
@@ -82,7 +82,7 @@ const MasterReport: React.FC = () => {
     smScore = Math.max(0, Math.min(100, Math.round(base - penalty)));
   }
 
-  // 3. Consortium Logic
+  // Consortium Logic
   const allPartners = [
     { name: 'Maji Safi Initiative', country: 'Kenya', specialty: 'Urban Sanitation', capacity: 2500000, risk: 'Low', score: 92 },
     { name: 'Sahel Water Alliance', country: 'Mali', specialty: 'Solar Boreholes', capacity: 800000, risk: 'Medium', score: 78 },
@@ -128,7 +128,7 @@ const MasterReport: React.FC = () => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', fontFamily: "'Instrument Sans', sans-serif" }}>
       
-      {/* EXPORT HEADER (Dark mode UI, excluded from PDF capture) */}
+      {/* EXPORT HEADER */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'rgba(59, 130, 246, 0.1)', border: `1px solid ${appTheme.accent}`, padding: '20px', borderRadius: '8px' }}>
         <div>
           <h2 style={{ margin: 0, fontSize: '1.2rem', color: appTheme.textPrimary }}>Enterprise Batch Export</h2>
@@ -142,7 +142,7 @@ const MasterReport: React.FC = () => {
         </div>
       </div>
 
-      {/* THE ACTUAL DOCUMENT CAPTURED BY HTML2PDF */}
+      {/* DOCUMENT CAPTURE BY HTML2PDF */}
       <div id="master-report-pdf" style={{ backgroundColor: printTheme.surface, padding: '40px', display: 'flex', flexDirection: 'column', gap: '48px', color: printTheme.textPrimary }}>
         
         {/* Cover Section */}
@@ -152,7 +152,7 @@ const MasterReport: React.FC = () => {
           <div style={{ marginTop: '16px', color: printTheme.textSecondary, fontSize: '1rem', fontWeight: 600 }}>Generated on: {new Date().toLocaleDateString()} | Master Batch Profile</div>
         </div>
 
-        {/* 1. RFP Data */}
+        {/* RFP Data */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <h2 style={{ fontSize: '1.5rem', color: printTheme.accent, borderBottom: `2px solid ${printTheme.border}`, paddingBottom: '8px', margin: 0, fontWeight: 800 }}>1. Extracted Tender Profile</h2>
           {reportData.rfp ? (
@@ -212,7 +212,7 @@ const MasterReport: React.FC = () => {
           ) : <div style={{ color: printTheme.textSecondary, fontStyle: 'italic' }}>No RFP Data parsed in current session.</div>}
         </div>
 
-        {/* 2. Climate & Tech */}
+        {/* Climate */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <h2 style={{ fontSize: '1.5rem', color: printTheme.accent, borderBottom: `2px solid ${printTheme.border}`, paddingBottom: '8px', margin: 0, fontWeight: 800 }}>2. Context-Adaptive Technical Framework</h2>
           {reportData.cp && reportData.cp.environment ? (
@@ -251,7 +251,7 @@ const MasterReport: React.FC = () => {
           ) : <div style={{ color: printTheme.textSecondary, fontStyle: 'italic' }}>No Climate data defined in current session.</div>}
         </div>
 
-        {/* 3. Systems Strengthening */}
+        {/* Systems Strengthening */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <h2 style={{ fontSize: '1.5rem', color: printTheme.accent, borderBottom: `2px solid ${printTheme.border}`, paddingBottom: '8px', margin: 0, fontWeight: 800 }}>3. Systems Strengthening Projection</h2>
           {reportData.sm ? (
@@ -290,7 +290,7 @@ const MasterReport: React.FC = () => {
           ) : <div style={{ color: printTheme.textSecondary, fontStyle: 'italic' }}>No Systems Modeler data in session.</div>}
         </div>
 
-        {/* 4. Monte Carlo Forecast */}
+        {/* Monte Carlo Forecast */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <h2 style={{ fontSize: '1.5rem', color: printTheme.accent, borderBottom: `2px solid ${printTheme.border}`, paddingBottom: '8px', margin: 0, fontWeight: 800 }}>4. Stochastic Risk Modeling (Monte Carlo)</h2>
           {reportData.mc && reportData.mc.hasRun ? (
@@ -311,7 +311,7 @@ const MasterReport: React.FC = () => {
                 </div>
               </div>
 
-              {/* Exact Visual Replication Based on View Choice - BULLETPROOF SVG FIX */}
+              {/* BULLETPROOF SVG FIX */}
               <div style={{ border: `1px solid ${printTheme.border}`, borderRadius: '12px', padding: '24px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
                   <h3 style={{ fontSize: '1rem', fontWeight: 800, color: printTheme.textPrimary, margin: 0 }}>Probability Density Forecast</h3>
@@ -362,7 +362,7 @@ const MasterReport: React.FC = () => {
           ) : <div style={{ color: printTheme.textSecondary, fontStyle: 'italic' }}>Simulation not yet run in current session.</div>}
         </div>
 
-        {/* 5. Consortium Matrix */}
+        {/* Consortium Matrix */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <h2 style={{ fontSize: '1.5rem', color: printTheme.accent, borderBottom: `2px solid ${printTheme.border}`, paddingBottom: '8px', margin: 0, fontWeight: 800 }}>5. Consortium Strategy Matrix</h2>
           <div style={{ fontSize: '0.9rem', color: printTheme.textSecondary, fontWeight: 700 }}>Applied Filter: <span style={{ color: printTheme.accent }}>{cmFilter}</span></div>

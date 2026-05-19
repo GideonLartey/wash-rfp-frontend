@@ -40,7 +40,7 @@ const Dashboard: React.FC = () => {
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [showIndividualModal, setShowIndividualModal] = useState(false);
   
-  // GeoJSON Data State
+  // GeoJSON 
   const [geoData, setGeoData] = useState<any | null>(null);
   const [mapKey, setMapKey] = useState(0);
 
@@ -55,7 +55,7 @@ const Dashboard: React.FC = () => {
     { title: 'Donor Partners Tracked', value: '10', change: '3 pending review, 1 approved', color: theme.warning },
   ];
 
-  // Global WASH Donors
+  // Global WASH Donors ot funding
   const donors = [
     { id: 'd1', name: 'FCDO (UK)', tenders: 15, coords: [51.5074, -0.1278] as [number, number], color: theme.success },
     { id: 'd2', name: 'Global Affairs Canada', tenders: 8, coords: [45.4215, -75.6972] as [number, number], color: theme.success },

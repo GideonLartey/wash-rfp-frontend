@@ -124,7 +124,7 @@ const Layout: React.FC = () => {
         <div style={{ height: '80px', borderBottom: `1px solid ${theme.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: isMobile ? '0 16px' : '0 40px', backgroundColor: '#0A0A0A' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '8px' : '16px' }}>
             
-            {/* Hamburger button to open sidebar on mobile */}
+            {/* Hamburger or 3-stripe button to open sidebar on mobile */}
             {isMobile && (
               <button 
                 onClick={() => setMobileMenuOpen(true)}

@@ -33,7 +33,7 @@ const MonteCarloSimulator: React.FC<MonteCarloProps> = ({ initialVolatility, cle
   const [hoverX, setHoverX] = useState<number | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
 
-  // Sync state to sessionStorage whenever a user changes a parameter or runs the model
+  // Sync state to sessionStorage when a parameter changes or the model is run
   useEffect(() => {
     sessionStorage.setItem('mc_state', JSON.stringify({
       funding, governance, volatility, hasRun, meanScore, probSuccess, worstCase, curvePath, activeView

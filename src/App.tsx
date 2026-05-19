@@ -10,7 +10,7 @@ import MonteCarloSimulator from './pages/MonteCarloSimulator';
 import RfpParser from './pages/RfpParser';
 import Login from './pages/Login';
 import MasterReport from './pages/MasterReport'; 
-import LogFrameMatrix from './pages/LogFrameMatrix'; // 1. NEW IMPORT
+import LogFrameMatrix from './pages/LogFrameMatrix'; 
 
 const App: React.FC = () => {
   // Global Analytics State
@@ -22,7 +22,7 @@ const App: React.FC = () => {
   const [evidenceQuery, setEvidenceQuery] = useState("");
   const [evidenceResults, setEvidenceResults] = useState<any[] | null>(null);
 
-  // NEW: Global Pipeline for Extracted Document Data
+  // Global Pipeline for Extracted Document Data
   const [extractedRfp, setExtractedRfp] = useState<any>(null);
 
   return (
@@ -32,7 +32,7 @@ const App: React.FC = () => {
         <Route path="/" element={<Layout />}>
           <Route index element={<Dashboard />} />
           
-          {/* Parser pushes data INTO the global pipeline */}
+          {/* Parser pushes data into global pipeline */}
           <Route 
             path="rfp-parser" 
             element={
@@ -56,7 +56,7 @@ const App: React.FC = () => {
             } 
           />
           
-          {/* Predictor READS the data from the pipeline to auto-fetch */}
+          {/* Predictor reads data */}
           <Route 
             path="climate" 
             element={
@@ -81,7 +81,7 @@ const App: React.FC = () => {
           />
           <Route path="master-report" element={<MasterReport />} />
           
-          {/* 2. NEW ROUTE: Automated LogFrame Matrix */}
+          {/* Automated LogFrame Matrix */}
           <Route path="logframe" element={<LogFrameMatrix />} />
           
         </Route>
