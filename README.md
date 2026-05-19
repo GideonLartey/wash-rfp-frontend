@@ -101,7 +101,6 @@ Create a .env file in the root of the wash-rfp-frontend directory. You can use t
 VITE_API_URL=http://localhost:8000
 ```
 
-
 (Point this URL to your local Python server address during local development).
 
 4. Run the Client Development Server
@@ -156,6 +155,21 @@ OpenWsh-Control/
     ├── tsconfig.node.json
     └── vite.config.ts
 ```
+
+
+## Application Preview
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
