@@ -77,33 +77,43 @@ OpenWSH-CONTROL uses a decoupled architecture. For clean organization, we place 
 
 Clone the frontend application directory to your local workstation:
 
-git clone https://github.com/DeonLondn/wash-rfp-frontend.git
+git clone 
+```bash
+https://github.com/DeonLondn/wash-rfp-frontend.git
+```
 
 
 2. Frontend Local Installation
 
 Open a terminal window and navigate into the newly cloned client folder:
 
+```bash
 cd wash-rfp-frontend
 npm install
+```
 
 
 3. Environment Configuration
 
 Create a .env file in the root of the wash-rfp-frontend directory. You can use the provided .env.example as a template:
 
+```bash
 VITE_API_URL=http://localhost:8000
+```
 
 
 (Point this URL to your local Python server address during local development).
 
 4. Run the Client Development Server
 
+```bash
 npm run dev
+```
 
 
 ## 📂 Project Structure
 
+```bash
 OpenWsh-Control/
 ├── wash-rfp-backend/
 │   ├── main.py
@@ -145,9 +155,10 @@ OpenWsh-Control/
     ├── tsconfig.json
     ├── tsconfig.node.json
     └── vite.config.ts
+```
 
 
-⚠️ Important Security Note: Ensure that your local .env configuration file is explicitly registered inside your .gitignore file. Never commit sensitive environment configurations, server keys, or API credentials to public code repositories. Only commit configuration templates like .env.example.
+
 
 ## 🗺️ Future Enhancements
 
