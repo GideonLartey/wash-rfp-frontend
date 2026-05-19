@@ -40,7 +40,7 @@ const Dashboard: React.FC = () => {
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [showIndividualModal, setShowIndividualModal] = useState(false);
   
-  // NEW STATE: GeoJSON Data
+  // GeoJSON Data State
   const [geoData, setGeoData] = useState<any | null>(null);
   const [mapKey, setMapKey] = useState(0);
 
@@ -52,19 +52,35 @@ const Dashboard: React.FC = () => {
   const metrics = [
     { title: 'Active Bids in Pipeline', value: '14', change: '+2 this week', color: theme.accent },
     { title: 'Total Pipeline Value', value: '£42.5M', change: '+£12M FCDO added', color: theme.success },
-    { title: 'Donor Partners Tracked', value: '50', change: '3 pending review, 1 approved', color: theme.warning },
+    { title: 'Donor Partners Tracked', value: '10', change: '3 pending review, 1 approved', color: theme.warning },
   ];
 
+  // Global WASH Donors
   const donors = [
     { id: 'd1', name: 'FCDO (UK)', tenders: 15, coords: [51.5074, -0.1278] as [number, number], color: theme.success },
     { id: 'd2', name: 'Global Affairs Canada', tenders: 8, coords: [45.4215, -75.6972] as [number, number], color: theme.success },
-    { id: 'd3', name: 'Conrad N. Hilton Foundation', tenders: 4, coords: [34.0522, -118.2437] as [number, number], color: theme.success },
+    { id: 'd3', name: 'Hilton Foundation', tenders: 4, coords: [34.0522, -118.2437] as [number, number], color: theme.success },
+    { id: 'd4', name: 'USAID', tenders: 22, coords: [38.8951, -77.0364] as [number, number], color: theme.success },
+    { id: 'd5', name: 'World Bank (WASH)', tenders: 35, coords: [38.8996, -77.0425] as [number, number], color: theme.success },
+    { id: 'd6', name: 'Gates Foundation', tenders: 12, coords: [47.6225, -122.3481] as [number, number], color: theme.success },
+    { id: 'd7', name: 'Sida (Sweden)', tenders: 9, coords: [59.3293, 18.0686] as [number, number], color: theme.success },
+    { id: 'd8', name: 'JICA (Japan)', tenders: 11, coords: [35.6762, 139.6503] as [number, number], color: theme.success },
+    { id: 'd9', name: 'UNICEF Global WASH', tenders: 18, coords: [40.7128, -74.0060] as [number, number], color: theme.success },
+    { id: 'd10', name: 'African Development Bank', tenders: 6, coords: [5.3599, -4.0082] as [number, number], color: theme.success },
   ];
 
+  // Global Implementation Partners
   const partners = [
     { id: 'p1', region: 'Mali', coords: [12.6392, -8.0029] as [number, number], org: 'Sahel Water Alliance', capacity: '$1.2M', from: 'd2', grant: '$8.5M (Canada)' },
     { id: 'p2', region: 'Kenya', coords: [-1.2921, 36.8219] as [number, number], org: 'Maji Safi Initiative', capacity: '$2.5M', from: 'd1', grant: '£12M (FCDO)' },
     { id: 'p3', region: 'Uganda', coords: [0.3476, 32.5825] as [number, number], org: 'Rural Hygiene Trust', capacity: '$800k', from: 'd3', grant: '$4M (Hilton)' },
+    { id: 'p4', region: 'Ghana', coords: [5.6037, -0.1870] as [number, number], org: 'West Africa WASH Consortium', capacity: '$4.5M', from: 'd4', grant: '$15M (USAID)' },
+    { id: 'p5', region: 'Ethiopia', coords: [9.1450, 40.4897] as [number, number], org: 'Horn of Africa Resiliency', capacity: '$8.2M', from: 'd5', grant: '$25M (World Bank)' },
+    { id: 'p6', region: 'Bangladesh', coords: [23.6850, 90.3563] as [number, number], org: 'Delta Sanitation Project', capacity: '$3.1M', from: 'd6', grant: '$9M (Gates)' },
+    { id: 'p7', region: 'Rwanda', coords: [-1.9403, 29.8739] as [number, number], org: 'Kigali Water Network', capacity: '$1.5M', from: 'd7', grant: '€6M (Sida)' },
+    { id: 'p8', region: 'Cambodia', coords: [12.5657, 104.9910] as [number, number], org: 'Mekong River Basin Auth.', capacity: '$5.5M', from: 'd8', grant: '¥1.2B (JICA)' },
+    { id: 'p9', region: 'Yemen', coords: [15.5527, 48.5164] as [number, number], org: 'Crisis Response Taskforce', capacity: '$2.1M', from: 'd9', grant: '$10M (UNICEF)' },
+    { id: 'p10', region: 'Senegal', coords: [14.4974, -14.4524] as [number, number], org: 'Dakar Infrastructure Fund', capacity: '$6.0M', from: 'd10', grant: '$18M (AfDB)' },
   ];
 
   const handleDownloadRfps = (donorName: string) => {
@@ -88,7 +104,7 @@ const Dashboard: React.FC = () => {
     URL.revokeObjectURL(url);
   };
 
-  // NEW HANDLER: Parse uploaded GeoJSON file
+  // Upload GeoJSON file handler
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -201,7 +217,7 @@ const Dashboard: React.FC = () => {
 
       <div style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', overflow: 'hidden', display: 'flex', flexDirection: 'column', position: 'relative' }}>
         
-        {/* NEW OVERLAY: GeoJSON Upload Panel */}
+        {/* GeoJSON Upload Panel */}
         <div style={{
           position: 'absolute', top: '90px', right: '20px', zIndex: 1000,
           backgroundColor: 'rgba(20, 20, 20, 0.9)', padding: '12px 16px', borderRadius: '8px',
@@ -232,7 +248,7 @@ const Dashboard: React.FC = () => {
             <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, color: theme.textPrimary }}>Live GIS Funding Tracker</h2>
             <div style={{ fontSize: '0.8rem', color: theme.textSecondary, marginTop: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ display: 'inline-block', width: '8px', height: '8px', backgroundColor: theme.success, borderRadius: '50%', boxShadow: `0 0 8px ${theme.success}` }}></span>
-              Real-Time FCDO, Canada, & Hilton Foundation Feeds
+              Real-Time Global Multilateral & Bilateral Donor Feeds Active
             </div>
           </div>
           <div style={{ display: 'flex', gap: '16px', fontSize: '0.8rem', fontWeight: 600, color: theme.textPrimary }}>
@@ -248,7 +264,7 @@ const Dashboard: React.FC = () => {
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             />
             
-            {/* NEW RENDER: GeoJSON Layer renders on top of the base map tiles */}
+            {/* GeoJSON Overlay Layer */}
             {geoData && (
               <GeoJSON 
                 key={mapKey} 
