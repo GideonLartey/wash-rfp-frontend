@@ -131,6 +131,17 @@ npm run dev
 
 To manage API consumption during the development and prototyping phase, the LogFrame Matrix and Climate Predictor component currently utilizes a structured mock-data. This ensures high-velocity testing of the UI/UX components without incurring unnecessary API token costs. The production-ready backend is already engineered to route these requests to the Gemini 2.5 Flash model for dynamic, RFP-specific output once you decide to deploy in a production environment with a configured billing tier.
 
+To prevent abuse of the system by bad actors, we implemented slowapi rate limiting in the backend(main.py) file:
+
+# get_remote_address: 
+This automatically identifies unique users based on their IP address.
+
+# request: Request: 
+The limiter needs this to read the incoming connection details.
+
+# The "429" Error: 
+If a user hits the button 6 times in a minute, the server won't crash or run up your AI bill. Instead, FastAPI will automatically reject the 6th request and send a clean HTTP 429 (Too Many Requests) status code back to your Next.js frontend.
+
 
 ## 😒 Project Constraints( Weird behaviour of the Monte Carlo Simulator line curve in batch PDFexport )
 
@@ -182,6 +193,40 @@ OpenWsh-Control/
     ├── tsconfig.json
     ├── tsconfig.node.json
     └── vite.config.ts
+```
+
+
+## System Architecture
+
+
+```mermaid
+flowchart LR
+    subgraph Client ["Frontend (Next.js)"]
+        UI["Dashboard & UI"]
+        GIS["Leaflet GIS Workspace"]
+    end
+
+    subgraph Server ["Backend (FastAPI)"]
+        API["REST API (Rate Limited)"]
+        WS["WebSocket Multiplayer Hub"]
+        PDF["WeasyPrint / GTK3 Engine"]
+    end
+
+    subgraph External ["External Intelligence"]
+        Gemini["Google Gemini 2.5 Flash"]
+    end
+
+    %% Client to Server Connections
+    UI <-->|HTTPS REST| API
+    UI <-->|wss:// (Real-time Sync)| WS
+    GIS --> UI
+
+    %% Server Internal & External Routing
+    API -->|Prompt & PDF Bytes| Gemini
+    Gemini -->|Structured JSON| API
+    
+    API -->|HTML Templates| PDF
+    PDF -->|Compiled .pdf binary| API
 ```
 
 
