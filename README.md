@@ -199,6 +199,10 @@ OpenWsh-Control/
 ## System Architecture
 
 
+## System Architecture
+
+
+
 ```mermaid
 flowchart LR
     subgraph Client ["Frontend (Next.js)"]
@@ -217,17 +221,16 @@ flowchart LR
     end
 
     %% Client to Server Connections
-    UI <-->|HTTPS REST| API
-    UI <-->|wss:// (Real-time Sync)| WS
+    UI -->|"HTTPS REST"| API
+    UI -->|"wss:// (Real-time Sync)"| WS
     GIS --> UI
 
     %% Server Internal & External Routing
-    API -->|Prompt & PDF Bytes| Gemini
-    Gemini -->|Structured JSON| API
+    API -->|"Prompt & PDF Bytes"| Gemini
+    Gemini -->|"Structured JSON"| API
     
-    API -->|HTML Templates| PDF
-    PDF -->|Compiled .pdf binary| API
-```
+    API -->|"HTML Templates"| PDF
+    PDF -->|"Compiled .pdf binary"| API
 
 
 ## 📸 Application Preview
