@@ -196,8 +196,6 @@ OpenWsh-Control/
 ```
 
 
-## System Architecture
-
 
 ## System Architecture
 
@@ -231,6 +229,9 @@ flowchart LR
     
     API -->|"HTML Templates"| PDF
     PDF -->|"Compiled .pdf binary"| API
+```
+
+
 
 
 ## 📸 Application Preview
