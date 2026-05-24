@@ -97,7 +97,7 @@ Clone the frontend application directory to your local workstation:
 
 git clone 
 ```bash
-https://github.com/DeonLondn/wash-rfp-frontend.git
+https://github.com/GideonLartey/wash-rfp-frontend.git
 ```
 
 
@@ -127,19 +127,20 @@ VITE_API_URL=http://localhost:8000
 npm run dev
 ```
 
+
 ## 📝NOTE:AI API Usage & Cost Optimization
 
 To manage API consumption during the development and prototyping phase, the LogFrame Matrix and Climate Predictor component currently utilizes a structured mock-data. This ensures high-velocity testing of the UI/UX components without incurring unnecessary API token costs. The production-ready backend is already engineered to route these requests to the Gemini 2.5 Flash model for dynamic, RFP-specific output once you decide to deploy in a production environment with a configured billing tier.
 
 To prevent abuse of the system by bad actors, we implemented slowapi rate limiting in the backend(main.py) file:
 
-# get_remote_address: 
+- **get_remote_address**: 
 This automatically identifies unique users based on their IP address.
 
-# request: Request: 
+- **request: Request**: 
 The limiter needs this to read the incoming connection details.
 
-# The "429" Error: 
+- **The "429" Error**: 
 If a user hits the button 6 times in a minute, the server won't crash or run up your AI bill. Instead, FastAPI will automatically reject the 6th request and send a clean HTTP 429 (Too Many Requests) status code back to your Next.js frontend.
 
 
