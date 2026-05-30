@@ -15,53 +15,142 @@ const LogFrameMatrix: React.FC = () => {
   };
 
   const [isGenerating, setIsGenerating] = useState(true);
-  const [matrixData, setMatrixData] = useState<any | null>(null);
+  const [isExporting, setIsExporting] = useState(false); 
+  const [matrixData, setMatrixData] = useState<any[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+  // --- BULLETPROOF CACHE IDENTIFIER ---
+  // Fallback chain: Project Number -> Project Title -> Current Timestamp
+  const rawRef = rfpData?.project_metadata?.reference_number || rfpData?.projectNumber;
+  const rawTitle = rfpData?.project_metadata?.title || rfpData?.outcomes?.[0];
+  
+  const uniqueIdentifier = (rawRef && rawRef !== "NOT SPECIFIED") 
+    ? rawRef 
+    : (rawTitle || Date.now().toString());
+
+  const cacheKey = `logframe_cache_${uniqueIdentifier}`;
 
   useEffect(() => {
-    // Simulation of backend AI generation process 
-    const timer = setTimeout(() => {
-      
-      // Inject the parsed country and budget if available
-      const targetRegion = rfpData?.primaryCountry || rfpData?.demographics || 'the Target Region';
-      const budgetSource = rfpData?.budget || 'Strategic Partners';
-      
-      // Mocked AI Output mapped to standard WASH LogFrame standards
-      // AI Switch: replace with a fetch() call to the backend (/api/generate-logframe) endpoint.
-      setMatrixData([
-        {
-          level: '1. Strategic Impact (Goal)',
-          narrative: `Long-term improvement in public health, gender equality, and economic resilience for populations in ${targetRegion}.`,
-          indicators: '15% reduction in waterborne disease incidence (e.g., Cholera) within 5 years.',
-          verification: 'National Ministry of Health epidemiological reports; WHO Annual Data.',
-          assumptions: 'Political stability allows for continued longitudinal health tracking.'
-        },
-        {
-          level: '2. Project Outcomes',
-          narrative: `Sustainable, year-round access to safe drinking water and localized sanitation management systems.`,
-          indicators: '85% of target population has access to <30 minute round-trip water source by Year 3.',
-          verification: 'JMP (Joint Monitoring Programme) household surveys; Local GIS telemetry.',
-          assumptions: 'Community water committees maintain active fee-collection protocols.'
-        },
-        {
-          level: '3. Tangible Outputs',
-          narrative: 'Installation of solar-powered borehole networks and community WASH training programs.',
-          indicators: '15 active high-yield solar boreholes; 30 certified community maintenance technicians.',
-          verification: 'Site commissioning certificates; OpenWSH-CONTROL IoT active node logs.',
-          assumptions: 'No critical supply chain failures for solar inverters and PVC casing.'
-        },
-        {
-          level: '4. Key Activities & Inputs',
-          narrative: `Geophysical surveying, procurement of Grundfos pumps, and allocation of ${budgetSource} capital.`,
-          indicators: 'Capital deployment of extracted contract value; 100% procurement audit compliance.',
-          verification: 'Financial disbursement ledgers; RFP Consortia Contracts.',
-          assumptions: 'Local inflation rates remain within the 10-year Monte Carlo risk forecast thresholds.'
-        }
-      ]);
+    if (!rfpData) {
+      setError("No RFP metadata available. Please parse a document first.");
       setIsGenerating(false);
-    }, 3500); 
+      return;
+    }
 
-    return () => clearTimeout(timer);
-  }, [rfpData]);
+    const fetchLiveLogFrame = async () => {
+      try {
+        setIsGenerating(true);
+        setError(null);
+
+        // 1. CACHE CHECK
+        if (cacheKey) {
+          const cachedMatrix = sessionStorage.getItem(cacheKey);
+          if (cachedMatrix) {
+            setMatrixData(JSON.parse(cachedMatrix));
+            setIsGenerating(false);
+            return; 
+          }
+        }
+
+        // LIVE GENERATION
+        const response = await fetch(`${apiUrl}/api/logframe-data`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ rfpData })
+        });
+
+        if (response.status === 429) {
+          throw new Error("You have reached the limit of 3 LogFrame generations per hour. Please wait a bit before trying again.");
+        }
+        
+        if (!response.ok) {
+          throw new Error(`Server returned status code ${response.status}`);
+        }
+
+        const result = await response.json();
+        
+        if (result.success && Array.isArray(result.data)) {
+          setMatrixData(result.data);
+          
+          // 3. SAVE TO CACHE
+          if (cacheKey) {
+            sessionStorage.setItem(cacheKey, JSON.stringify(result.data));
+          }
+          
+        } else {
+          throw new Error("Data returned from server did not match the expected LogFrame matrix structure.");
+        }
+      } catch (err: any) {
+        console.error("Failed to fetch live LogFrame matrix:", err);
+        setError(err.message || "Connection to AI data engine failed.");
+        
+        // STRICT LOCKDOWN RULE: Wipe screen and cache on rate limit
+        if (err.message.includes("limit")) {
+          if (cacheKey) sessionStorage.removeItem(cacheKey);
+          setMatrixData(null);
+        }
+      } finally {
+        setIsGenerating(false);
+      }
+    };
+
+    fetchLiveLogFrame();
+  }, [rfpData, apiUrl, cacheKey]);
+
+  // Secure Backend PDF Export Logic
+  const handleExportToPDF = async () => {
+    if (!matrixData) return;
+    setIsExporting(true);
+    try {
+      const response = await fetch(`${apiUrl}/api/generate-logframe`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ rfpData: rfpData || {} }) 
+      });
+
+      if (response.status === 429) {
+        throw new Error("You have reached the limit of 3 LogFrame exports per hour. Please wait a bit before trying again.");
+      }
+
+      if (!response.ok) {
+        throw new Error(`Server responded with ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      const fileName = (rawRef && rawRef !== "NOT SPECIFIED") ? `LogFrame_${rawRef}.pdf` : `LogFrame_Export.pdf`;
+        
+      link.setAttribute('download', fileName);
+      document.body.appendChild(link);
+      
+      link.click();
+      link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+    } catch (err: any) {
+      console.error("PDF Export failed:", err);
+      
+      // STRICT LOCKDOWN RULE: Wipe screen, clear cache, and trigger full UI error block instead of just an alert
+      if (err.message.includes("limit")) {
+        if (cacheKey) sessionStorage.removeItem(cacheKey);
+        setMatrixData(null);
+        setError(err.message);
+      } else {
+        alert(err.message || "Failed to generate PDF. Check the backend server connection.");
+      }
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', fontFamily: "'Instrument Sans', sans-serif", paddingBottom: '40px' }}>
@@ -91,24 +180,39 @@ const LogFrameMatrix: React.FC = () => {
           </button>
           <h1 style={{ fontSize: '2rem', fontWeight: 800, margin: 0, color: theme.textPrimary }}>Automated Logical Framework</h1>
           <p style={{ color: theme.textSecondary, marginTop: '8px', fontSize: '0.9rem' }}>
-            AI-Generated LogFrame Matrix derived from RFP Document: <span style={{ color: theme.success, fontWeight: 700 }}>{rfpData?.projectNumber || 'Active Document'}</span>
+            AI-Generated LogFrame Matrix derived from RFP Document: <span style={{ color: theme.success, fontWeight: 700 }}>{uniqueIdentifier.length > 25 ? uniqueIdentifier.substring(0,25) + '...' : uniqueIdentifier}</span>
           </p>
         </div>
         
-        {!isGenerating && (
+        {!isGenerating && matrixData && (
           <button 
-            onClick={() => window.print()}
-            style={{ backgroundColor: theme.surface, color: theme.textPrimary, border: `1px solid ${theme.border}`, padding: '10px 20px', borderRadius: '6px', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s' }}
-            onMouseEnter={(e) => e.currentTarget.style.borderColor = theme.textSecondary}
-            onMouseLeave={(e) => e.currentTarget.style.borderColor = theme.border}
+            onClick={handleExportToPDF}
+            disabled={isExporting}
+            style={{ 
+              backgroundColor: theme.surface, 
+              color: theme.textPrimary, 
+              border: `1px solid ${theme.border}`, 
+              padding: '10px 20px', 
+              borderRadius: '6px', 
+              fontWeight: 700, 
+              cursor: isExporting ? 'wait' : 'pointer', 
+              fontSize: '0.85rem', 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '8px', 
+              transition: 'all 0.2s',
+              opacity: isExporting ? 0.7 : 1
+            }}
+            onMouseEnter={(e) => !isExporting && (e.currentTarget.style.borderColor = theme.textSecondary)}
+            onMouseLeave={(e) => !isExporting && (e.currentTarget.style.borderColor = theme.border)}
           >
-            🖨️ EXPORT TO PDF
+            {isExporting ? '⏳ GENERATING...' : '🖨️ EXPORT TO PDF'}
           </button>
         )}
       </div>
 
       {/* DYNAMIC GENERATION STATE */}
-      {isGenerating ? (
+      {isGenerating && (
         <div style={{ height: '400px', backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', position: 'relative', overflow: 'hidden' }}>
           
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', backgroundColor: 'transparent', overflow: 'hidden' }}>
@@ -121,9 +225,25 @@ const LogFrameMatrix: React.FC = () => {
             Gemini AI is cross-referencing extracted RFP metadata with standard USAID & FCDO structural logic frameworks.
           </p>
         </div>
-      ) : (
-        
-        /* LOGFRAME MATRIX GRID */
+      )}
+
+      {/* ERROR STATE VIEW (Including Rate Limit Warning) */}
+      {error && (
+        <div style={{ padding: '24px', backgroundColor: 'rgba(239, 68, 68, 0.05)', border: `1px solid ${theme.danger}`, borderRadius: '12px', textAlign: 'center' }}>
+          <div style={{ fontSize: '2rem', marginBottom: '8px' }}>⚠️</div>
+          <h3 style={{ color: theme.textPrimary, margin: 0 }}>Request Blocked</h3>
+          <p style={{ color: theme.warning, fontSize: '1rem', marginTop: '12px', fontWeight: 600 }}>{error}</p>
+          <button 
+            onClick={() => navigate('/rfp-parser')}
+            style={{ marginTop: '20px', backgroundColor: theme.surface, color: theme.textPrimary, border: `1px solid ${theme.border}`, padding: '8px 16px', borderRadius: '6px', fontWeight: 700, cursor: 'pointer' }}
+          >
+            Return to Upload Screen
+          </button>
+        </div>
+      )}
+
+      {/* LOGFRAME MATRIX GRID */}
+      {!isGenerating && matrixData && (
         <div style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: '12px', overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}>
           
           {/* MATRIX HEADERS */}
@@ -136,7 +256,7 @@ const LogFrameMatrix: React.FC = () => {
           </div>
 
           {/* MATRIX ROWS */}
-          {matrixData && matrixData.map((row: any, index: number) => (
+          {matrixData.map((row: any, index: number) => (
             <div key={index} style={{ 
               display: 'grid', gridTemplateColumns: '1fr 2fr 2fr 2fr 2fr', 
               padding: '20px 16px', gap: '16px', borderBottom: index === matrixData.length - 1 ? 'none' : `1px solid ${theme.border}`,

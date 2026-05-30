@@ -11,7 +11,7 @@ interface LiveContextData {
 const ClimatePredictor: React.FC<{ 
   setSharedVolatility?: (v: 'Low' | 'Medium' | 'High') => void;
   setLiveContext?: (data: LiveContextData | null) => void; 
-  extractedRfp?: any; // incoming data from the pipeline
+  extractedRfp?: any; 
 }> = ({ setSharedVolatility, setLiveContext, extractedRfp }) => {
   const theme = {
     surface: '#141414', border: '#262626', textPrimary: '#F5F5F5',
@@ -29,7 +29,6 @@ const ClimatePredictor: React.FC<{
   const [isFetching, setIsFetching] = useState(false);
   const [liveData, setLiveData] = useState<LiveContextData | null>(savedState?.liveData || null);
   
-  // catching infinite fetch loop
   const [autoFetched, setAutoFetched] = useState(savedState?.autoFetched || false);
 
   useEffect(() => {
@@ -42,13 +41,15 @@ const ClimatePredictor: React.FC<{
     }
   }, [environment, climateRisk, targetPopulation, liveData, countrySearch, autoFetched, setSharedVolatility]);
 
-  // Refactoring fetch logic into a reusable function
   const executeFetch = async (query: string) => {
     if (!query.trim()) return;
     setIsFetching(true);
     
     try {
-      const response = await fetch(`https://wash-ai.onrender.com/api/context/${query}`);
+      // Dynamic URL targeting local backend and not the Render cloud
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${apiUrl}/api/context/${query}`);
+      
       if (!response.ok) throw new Error("Failed to fetch context");
       
       const data: LiveContextData = await response.json();
@@ -68,16 +69,13 @@ const ClimatePredictor: React.FC<{
 
   const handleManualFetchContext = () => executeFetch(countrySearch);
 
-  // --- AUTONOMOUS TRIGGER ENGINE ---
   useEffect(() => {
-    
     if (extractedRfp && extractedRfp.target_demographics && !autoFetched && !liveData) {
       const targetCountry = extractedRfp.target_demographics;
-      setCountrySearch(targetCountry); // Fills the search bar automatically 
-      setAutoFetched(true);            // Locks the auto-fetcher
-      executeFetch(targetCountry);     // Fires the Python backend immediately
+      setCountrySearch(targetCountry); 
+      setAutoFetched(true);            
+      executeFetch(targetCountry);     
     }
-  
   }, [extractedRfp, autoFetched, liveData]);
 
   const resetPredictor = () => {
@@ -86,7 +84,7 @@ const ClimatePredictor: React.FC<{
     setTargetPopulation(50000);
     setLiveData(null);
     setCountrySearch('');
-    setAutoFetched(false); // Unlock the auto-fetcher on reset
+    setAutoFetched(false); 
     sessionStorage.removeItem('cp_state');
     if (setLiveContext) setLiveContext(null);
   };
