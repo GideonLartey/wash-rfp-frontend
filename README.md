@@ -1,4 +1,6 @@
 
+
+
 <p align="center">
   <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react" />
   <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript" />
@@ -131,9 +133,9 @@ npm run dev
 ```
 
 
-## 📝NOTE:AI API Usage & Cost Optimization
+## 📝AI API Usage & Cost Optimization
 
-To manage API consumption during the development and prototyping phase, the LogFrame Matrix and Climate Predictor component currently utilizes a structured mock-data. This ensures high-velocity testing of the UI/UX components without incurring unnecessary API token costs. The production-ready backend is already engineered to route these requests to the Gemini 2.5 Flash model for dynamic, RFP-specific output once you decide to deploy in a production environment with a configured billing tier.
+To manage API consumption during the development and prototyping phase, the LogFrame Matrix and Climate Predictor have been heavily rate-limited. This ensures high-velocity testing of the UI/UX components without incurring unnecessary API token costs. 
 
 To prevent abuse of the system by bad actors, we implemented slowapi rate limiting in the backend(main.py) file:
 
